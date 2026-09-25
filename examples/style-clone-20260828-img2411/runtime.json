@@ -1,0 +1,22 @@
+{
+  "format": "hypit.runtime-local@1",
+  "dataRoot": "../../../.hypit/runtimes/edit20260828img2411",
+  "endpoints": {
+    "media.local": {
+      "use": "@hypit/provider-media-local",
+      "config": {
+        "ffmpegPath": "C:\\Users\\admin\\.codex\\plugins\\cache\\openai-curated-remote\\mandarin-talking-head-rough-cut\\1.1.0\\skills\\rough-cut\\.tools\\ffmpeg\\bin\\ffmpeg.exe",
+        "ffprobePath": "C:\\Users\\admin\\.codex\\plugins\\cache\\openai-curated-remote\\mandarin-talking-head-rough-cut\\1.1.0\\skills\\rough-cut\\.tools\\ffmpeg\\bin\\ffprobe.exe"
+      }
+    },
+    "hyperframes.local": {
+      "use": "@hypit/provider-hyperframes-local",
+      "config": {
+        "ffmpegPath": "C:\\Users\\admin\\.codex\\plugins\\cache\\openai-curated-remote\\mandarin-talking-head-rough-cut\\1.1.0\\skills\\rough-cut\\.tools\\ffmpeg\\bin\\ffmpeg.exe",
+        "ffprobePath": "C:\\Users\\admin\\.codex\\plugins\\cache\\openai-curated-remote\\mandarin-talking-head-rough-cut\\1.1.0\\skills\\rough-cut\\.tools\\ffmpeg\\bin\\ffprobe.exe",
+        "workers": 2,
+        "browserGpu": "software"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="pipeline" from="@hypit/media-pipeline@1"/>
+  <import as="media-track" from="@hypit/media-track@1"/>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="spatial" from="@hypit/spatial@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./style_clone_25_real.svs"/>
+  <media:Video id="source-video" src="./assets25/25_first20.mp4"/>
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="20s"/>
+  <spatial:Canvas id="canvas" width="720" height="1280"/>
+  <spatial:Frame id="full-frame" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <pipeline:Normalize id="source-media" source={source-video}
+    video="primary-moving" audio="default" span-authority="video" clock={clock}/>
+  <media-track:Track id="main-video" timeline={edit.timeline} canvas={canvas}>
+    <media-track:Item id="video-clip" media={source-media.media} frame={full-frame}
+      during="program" appearance={look.media.full}/>
+  </media-track:Track>
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={main-video.visual}/>
+  </film:Film>
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

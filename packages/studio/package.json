@@ -38,6 +38,7 @@
     "@hypit/script-studio": "workspace:*",
     "@hypit/speech": "workspace:*",
     "@hypit/studio-adapter": "workspace:*",
+    "@hypit/style-library": "workspace:*",
     "@hypit/svs": "workspace:*",
     "@hypit/temporal": "workspace:*",
     "@hypit/timeline": "workspace:*",

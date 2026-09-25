@@ -40,6 +40,12 @@ function json(response: import("node:http").ServerResponse, status: number, valu
   response.end(`${JSON.stringify(value)}\n`);
 }
 
+function contentDisposition(filename: string): string {
+  const clean = filename.replace(/[\r\n"']/gu, "_").trim() || "video";
+  const ascii = clean.replace(/[^\x20-\x7e]/gu, "_");
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(clean)}`;
+}
+
 function requestedByteRange(value: string | undefined, size: number): BuildResultFileRange | undefined {
   if (value === undefined) return undefined;
   const match = /^bytes=(\d*)-(\d*)$/u.exec(value.trim());
@@ -576,6 +582,29 @@ export function studioPlugin(options: StudioPluginOptions): Plugin {
           })();
           return;
         }
+        if (request.method === "POST" && url.pathname === "/__studio/export") {
+          void (async () => {
+            try {
+              if (options.buildLibrary === undefined) throw new Error("Result Repository is unavailable.");
+              if (mutating || timer !== undefined || publishing > 0) {
+                throw new Error("Wait for the current Studio update to finish before exporting.");
+              }
+              const exported = await options.buildLibrary.exportVideo(options.runPath);
+              const query = new URLSearchParams({
+                build: exported.build,
+                output: exported.output,
+                download: "1",
+              });
+              json(response, 200, {
+                ...exported,
+                url: `/__studio/artifact?${query.toString()}`,
+              });
+            } catch (error) {
+              json(response, 409, { error: error instanceof Error ? error.message : String(error) });
+            }
+          })();
+          return;
+        }
         if (request.method !== "GET" && request.method !== "HEAD") {
           next();
           return;
@@ -723,6 +752,9 @@ export function studioPlugin(options: StudioPluginOptions): Plugin {
               : range.endExclusive - range.start));
             response.setHeader("cache-control", "private, no-store");
             response.setHeader("accept-ranges", "bytes");
+            if (url.searchParams.get("download") === "1") {
+              response.setHeader("content-disposition", contentDisposition(artifact.filename));
+            }
             if (range !== undefined) {
               response.setHeader("content-range", `bytes ${range.start}-${range.endExclusive - 1}/${artifact.size}`);
             }

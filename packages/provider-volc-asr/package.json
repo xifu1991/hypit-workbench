@@ -1,0 +1,20 @@
+{
+  "name": "@hypit/provider-volc-asr",
+  "version": "0.0.0-dev",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "hypit": {
+    "activation": "./src/activation.ts"
+  },
+  "dependencies": {
+    "@hypit/endpoint-kit": "workspace:*",
+    "@hypit/protocol": "workspace:*",
+    "@hypit/runtime-kit": "workspace:*",
+    "@hypit/speech-evidence": "workspace:*",
+    "@hypit/whisperx": "workspace:*"
+  }
+}

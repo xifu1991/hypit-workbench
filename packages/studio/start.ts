@@ -10,6 +10,7 @@ Open a Run in the browser to inspect its composition, Sources and Results.
 
   hypit studio --run <build.svrun> [--runtime <hypit.runtime.json>]
     [--port <number>] [--workspace <directory>] [--package-root <directory>]
+    [--style-library <directory>]
     [--locale-pack <./language.json | installed-package/language.json>]...
 
   hypit studio --check-locale <./language.json | installed-package/language.json>
@@ -23,6 +24,7 @@ Relative command-line paths start at the current directory; --workspace selects
 the project, without rebasing those paths. Otherwise the nearest package.json
 above the current directory defines the project (or the current directory if none).
 Without --runtime, Studio uses that project's .hypit/runtime selection.
+The style library defaults to <workspace>/style-library or HYPIT_STYLE_LIBRARY.
 The server prints its project, Run, Runtime selection and browser URL.
 Press Ctrl+C to stop it.
 `);
@@ -33,7 +35,9 @@ function invalidArguments(message: string): never {
 }
 
 function argumentsByName(argv: readonly string[]): ReadonlyMap<string, readonly string[]> {
-  const accepted = new Set(["run", "runtime", "port", "workspace", "package-root", "locale-pack", "check-locale"]);
+  const accepted = new Set([
+    "run", "runtime", "port", "workspace", "package-root", "style-library", "locale-pack", "check-locale",
+  ]);
   const result = new Map<string, string[]>();
   for (let index = 0; index < argv.length; index += 2) {
     const flag = argv[index];
@@ -71,6 +75,10 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
   const packageRoot = packageRootArgument === undefined
     ? workspaceRoot
     : resolve(invokedFrom, packageRootArgument);
+  const styleLibraryArgument = values.get("style-library")?.at(-1);
+  const styleLibraryRoot = styleLibraryArgument === undefined
+    ? resolve(process.env.HYPIT_STYLE_LIBRARY ?? resolve(workspaceRoot, "style-library"))
+    : resolve(invokedFrom, styleLibraryArgument);
   const { describeLanguagePack, loadLanguagePack, studioLanguages, studioLocalizationPlugin } = await import("./src/localization-node.js");
   const checkLocale = values.get("check-locale")?.at(-1);
   if (checkLocale !== undefined) {
@@ -87,6 +95,7 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
   const { loadStudioDomain } = await import("./src/domain.js");
   const { loadStudioRun } = await import("./src/run.js");
   const { studioPlugin } = await import("./src/server.js");
+  const { studioStyleLibraryPlugin } = await import("./src/style-library-server.js");
   const { studioFeedbackPlugin } = await import("./src/feedback-server.js");
   const { inspectStudioRun } = await import("./src/studio-preflight.js");
   const languages = await studioLanguages(values.get("locale-pack") ?? [], invokedFrom, packageRoot);
@@ -103,6 +112,7 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
     `  Runtime Profile    ${runtimePath ?? "not selected"}`,
     `  Runtime selection  ${runtimeArgument !== undefined
       ? "command argument (this session only)" : selectedRuntime?.selectionFile ?? "none"}`,
+    `  Style library      ${styleLibraryRoot}`,
     ...(packageRoot === workspaceRoot ? [] : [`  Package root       ${packageRoot}`]),
     "",
   ].join("\n"));
@@ -152,16 +162,22 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
       // must therefore be readable for self-hosted fonts and other declared
       // Studio dependencies, while the author workspace remains separately
       // available for Source and material previews.
-      fs: { allow: [workspaceRoot, packageRoot, distributionPackageRoot, here] },
+      fs: { allow: [workspaceRoot, packageRoot, styleLibraryRoot, distributionPackageRoot, here] },
     },
-    plugins: [distributionImports, studioLocalizationPlugin(languages), studioFeedbackPlugin(workspaceRoot, runPath), studioPlugin({
+    plugins: [
+      distributionImports,
+      studioLocalizationPlugin(languages),
+      studioFeedbackPlugin(workspaceRoot, runPath),
+      studioStyleLibraryPlugin({ root: styleLibraryRoot, workspaceRoot }),
+      studioPlugin({
       source,
       runPath,
       workspaceRoot,
       domain,
       registry,
       ...(buildLibrary === undefined ? {} : { buildLibrary }),
-    })],
+      }),
+    ],
   });
   server.httpServer?.once("close", () => {
     void buildLibrary.close().catch((error: unknown) => {

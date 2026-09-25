@@ -12,8 +12,9 @@ import { audioPreview } from "./material-preview.js";
 import { createSidebarPanel, sidebarItem } from "./sidebar-panel.js";
 import { icon } from "./icons.js";
 import { mergeStudioArtifacts } from "../library-media.js";
+import { createStylesPane } from "./styles.js";
 
-type LibrarySection = "source" | "tasks" | "artifacts";
+type LibrarySection = "source" | "styles" | "tasks" | "artifacts";
 
 export type LibraryPane = {
   readonly element: HTMLElement;
@@ -153,6 +154,9 @@ function artifactCard(artifact: StudioArtifactView, open: (artifact: StudioArtif
     output: artifact.output,
   });
   const href = `/__studio/artifact?${query.toString()}`;
+  const downloadQuery = new URLSearchParams(query);
+  downloadQuery.set("download", "1");
+  const downloadHref = `/__studio/artifact?${downloadQuery.toString()}`;
 
   link.dataset.artifactId = artifact.id;
   link.dataset.build = artifact.build;
@@ -170,6 +174,15 @@ function artifactCard(artifact: StudioArtifactView, open: (artifact: StudioArtif
   preview.setAttribute("role", "button");
   uiAttr(preview, "aria-label", "library.preview-name", { name: title });
   preview.addEventListener("click", () => open(artifact));
+  const download = document.createElement("a");
+  download.className = "artifact-download";
+  download.href = downloadHref;
+  download.download = title;
+  download.innerHTML = icon("download");
+  uiAttr(download, "aria-label", "library.download");
+  uiAttr(download, "title", "library.download");
+  download.addEventListener("click", (event) => event.stopPropagation());
+  preview.append(download);
   const name = createArtifactName({
     name: title,
     editable: artifact.nameEditable === true,
@@ -255,6 +268,9 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
       <button type="button" class="library-tab" data-library-tab="tasks" role="tab" aria-selected="false">
         <span>${icon("tasks")}</span><strong>${uiLabel("library.tasks")}</strong>
       </button>
+      <button type="button" class="library-tab" data-library-tab="styles" role="tab" aria-selected="false">
+        <span>${icon("layers")}</span><strong>${uiLabel("library.styles")}</strong>
+      </button>
       <button type="button" class="library-tab" data-library-tab="artifacts" role="tab" aria-selected="false">
         <span>${icon("results")}</span><strong>${uiLabel("library.artifacts")}</strong>
       </button>
@@ -262,6 +278,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     <section class="library-view active" data-library-view="source">
     </section>
     <section class="library-view" data-library-view="tasks"></section>
+    <section class="library-view" data-library-view="styles"></section>
     <section class="library-view" data-library-view="artifacts">
     </section>`;
 
@@ -271,6 +288,8 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   sourcePanel.content.classList.add("source-code");
   sourcePanel.content.append(code.element);
   element.querySelector('[data-library-view="source"]')!.append(sourcePanel.element);
+  const stylesPane = createStylesPane();
+  element.querySelector('[data-library-view="styles"]')!.append(stylesPane.element);
   const taskPanel = createSidebarPanel("panel", "library.task-categories");
   uiAttr(taskPanel.navigation, "aria-label", "library.task-categories");
   taskPanel.toolbar.innerHTML = `<span class="code-location" data-task-heading>${uiLabel("library.all-tasks")}</span><div class="task-context" data-task-context hidden></div>
@@ -498,7 +517,8 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     }
     if (next === "artifacts") renderArtifacts();
     if (next === "tasks") renderTasks();
-    if (next !== "source" && reload) void refresh(next);
+    if (next === "styles") stylesPane.activate();
+    if ((next === "tasks" || next === "artifacts") && reload) void refresh(next);
     else request?.abort();
   };
 
@@ -555,7 +575,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     });
   }
   for (const button of Array.from(element.querySelectorAll<HTMLButtonElement>("[data-library-refresh]"))) {
-    button.addEventListener("click", () => { if (active !== "source") void refresh(active); });
+    button.addEventListener("click", () => { if (active === "tasks" || active === "artifacts") void refresh(active); });
   }
 
   return {
@@ -565,6 +585,9 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
       snapshot = value;
       renderSources();
     },
-    refresh: async () => { if (active !== "source") await refresh(active); },
+    refresh: async () => {
+      if (active === "styles") await stylesPane.refresh();
+      else if (active !== "source") await refresh(active);
+    },
   };
 }

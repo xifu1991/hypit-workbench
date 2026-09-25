@@ -1,5 +1,5 @@
 import { bindDropdown } from "./dropdown.js";
-import { uiLabel, uiAttribute, uiText, uiAttr, userText, languageMenu, initializeI18n, type Message } from "./i18n.js";
+import { t, uiLabel, uiAttribute, uiText, uiAttr, userText, languageMenu, initializeI18n, type Message } from "./i18n.js";
 import type { Clip, StudioFailure, StudioInspectorDomain, StudioSnapshot } from "../shared.js";
 import type { CanonicalValue, ValueSchema } from "@hypit/protocol";
 import { parameterAuthorValue, parameterControlForSchema, parameterNumber, parameterOption, parameterRecordSchema, parameterRecordVariants, validateParameterValue } from "../parameter-values.js";
@@ -44,6 +44,9 @@ app.innerHTML = `
     <div class="topbar-right">
       <div class="meta" data-meta></div>
       <div class="status" data-status></div>
+      <button type="button" class="export-video" data-export-video>
+        ${icon("download")}<span>${uiLabel("studio.export-video")}</span>
+      </button>
       <div data-language-menu></div>
       <div class="view-tabs" role="tablist" ${uiAttribute("aria-label", "app.studio-view")}>
         <button type="button" role="tab" data-view="studio" aria-selected="true">${icon("studio")}${uiLabel("app.studio")}</button>
@@ -124,6 +127,48 @@ const meta = app.querySelector<HTMLElement>("[data-meta]")!;
 const project = app.querySelector<HTMLElement>("[data-project]")!;
 const status = app.querySelector<HTMLElement>("[data-status]")!;
 const failureView = app.querySelector<HTMLElement>("[data-failure]")!;
+const exportVideo = app.querySelector<HTMLButtonElement>("[data-export-video]")!;
+
+function downloadArtifact(url: string, filename?: string): void {
+  const link = document.createElement("a");
+  link.href = url;
+  if (filename !== undefined) link.download = filename;
+  link.hidden = true;
+  document.body.append(link);
+  link.click();
+  link.remove();
+}
+
+exportVideo.addEventListener("click", () => {
+  if (exportVideo.disabled) return;
+  const label = exportVideo.querySelector<HTMLElement>("span")!;
+  exportVideo.disabled = true;
+  exportVideo.classList.add("is-exporting");
+  uiText(label, "studio.exporting");
+  status.className = "status saving";
+  status.title = "";
+  uiText(status, "studio.exporting");
+  void fetch("/__studio/export", { method: "POST" })
+    .then(async (response) => {
+      const result = await response.json() as { readonly url?: string; readonly filename?: string; readonly error?: string };
+      if (!response.ok || typeof result.url !== "string") {
+        throw new Error(result.error ?? t("studio.export-failed"));
+      }
+      downloadArtifact(result.url, result.filename);
+      status.className = "status saved";
+      uiText(status, "studio.export-complete");
+    })
+    .catch((error: unknown) => {
+      status.className = "status error";
+      uiText(status, "studio.export-failed");
+      status.title = error instanceof Error ? error.message : String(error);
+    })
+    .finally(() => {
+      exportVideo.disabled = false;
+      exportVideo.classList.remove("is-exporting");
+      uiText(label, "studio.export-video");
+    });
+});
 
 const changeView = (): void => {
   const current = window.location.hash === "#comments" ? "comments" : "studio";

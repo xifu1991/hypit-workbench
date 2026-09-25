@@ -1,0 +1,26 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="spatial" from="@hypit/spatial@1"/>
+  <import as="styleboard" from="@example/style-board@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./style_clone_25_real.svs"/>
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="30s"/>
+  <spatial:Canvas id="canvas" width="720" height="1280"/>
+  <styleboard:Board id="style-clone-25-video" timeline={edit.timeline} canvas={canvas}
+    during="program"
+    title="9月19日｜30秒风格克隆"
+    subtitle="0-3秒人物钩子｜露脸与产品交替｜关键词/CTA 场景控制"
+    open="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets25/open.jpg"
+    product="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets25/product.jpg"
+    face="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets25/face.jpg"
+    circle="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets25/circle.jpg"
+    notes="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets25/notes.jpg"
+    final="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets25/final.jpg"/>
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={style-clone-25-video.track}/>
+  </film:Film>
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

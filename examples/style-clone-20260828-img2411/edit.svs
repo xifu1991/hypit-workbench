@@ -1,0 +1,21 @@
+<?svml using="@hypit/svs@1"?>
+<sheet version="1">
+ film.main { background: #000000; }
+ media.p19 { stack-order: 0; fit: cover; playback: once-start; trim-start: 988; trim-end: 1078; }
+ media.p20 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1078; trim-end: 1258; }
+ media.p21 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1258; trim-end: 1318; }
+ media.p22 { stack-order: 0; fit: cover; fit-offset-y: 30; playback: once-start; trim-start: 1318; trim-end: 1468; clip: rounded; radius: 216; border-width: 6; border-style: solid; border-color: #FFFFFF; shadows: "0 10 24 0 #000000AA"; }
+ media.p23 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1468; trim-end: 1708; }
+ media.product-close { stack-order: 0; fit: cover; playback: once-start; trim-start: 1708; trim-end: 1888; }
+ media.presenter-pip { stack-order: 10; fit: cover; fit-offset-y: 30; playback: once-start; trim-start: 1708; trim-end: 1888; clip: rounded; radius: 94; border-width: 4; border-style: solid; border-color: #FFFFFF; shadows: "0 8 20 0 #000000BB"; }
+ media.p26 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1888; trim-end: 2008; }
+ media.p27 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2008; trim-end: 2077; }
+ text.key { stack-order: 40; size: 42; weight: 900; align: center; block-align: center; line-height: 1.15; }
+ text.caption { stack-order: 50; size: 38; weight: 900; align: center; block-align: center; line-height: 1.22; }
+ text.t01 { stack-order: 60; size: 50; weight: 900; align: center; block-align: center; line-height: 1.05; }
+ text.t02 { stack-order: 61; size: 72; weight: 900; align: center; block-align: center; line-height: 1.02; }
+ text.s01 { stack-order: 62; size: 42; weight: 900; align: center; block-align: center; line-height: 1.02; }
+ text.s02 { stack-order: 63; size: 66; weight: 900; align: center; block-align: center; line-height: 1.02; }
+ text.p01 { stack-order: 64; size: 34; weight: 900; align: center; block-align: center; line-height: 1.05; wrap: none; }
+ text.p02 { stack-order: 65; size: 82; weight: 900; align: center; block-align: center; line-height: 1.0; wrap: none; }
+</sheet>

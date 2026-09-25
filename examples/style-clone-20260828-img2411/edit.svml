@@ -1,0 +1,142 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+ <import as="media" from="@hypit/media@1"/>
+ <import as="pipeline" from="@hypit/media-pipeline@1"/>
+ <import as="picture" from="@hypit/media-track@1"/>
+ <import as="audio" from="@hypit/audio-track@1"/>
+ <import as="time" from="@hypit/timeline-author@1"/>
+ <import as="space" from="@hypit/spatial@1"/>
+ <import as="typo" from="@hypit/typography-track@1"/>
+ <import as="film" from="@hypit/film@1"/>
+ <import as="render" from="@hypit/render-hyperframes@1"/>
+ <import as="look" source="./edit.svs"/>
+ <media:Video id="source" src="./assets/source.mp4"/>
+ <media:Video id="productClose" src="./assets/product_closeup.mp4"/>
+ <media:Font id="font" src="./assets/Chinese-Bold.ttf" weight="900" style="normal"/>
+ <time:Clock id="clock" frame-rate="30"/>
+ <time:Timeline id="timeline" clock={clock} end="1089f"/>
+ <space:Canvas id="canvas" width="720" height="1280"/>
+ <space:Frame id="full" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+ <space:Frame id="key-top" within={canvas} left="4%" top="0.8%" right="96%" bottom="6%"/>
+ <space:Frame id="caption-band" within={canvas} left="6%" top="83%" right="94%" bottom="94%"/>
+ <space:Frame id="intro-pip" within={canvas} left="21%" top="14%" right="79%" bottom="74%"/>
+ <space:Frame id="intro-top" within={canvas} left="4%" top="1.5%" right="96%" bottom="10%"/>
+ <space:Frame id="intro-bottom-a" within={canvas} left="8%" top="76%" right="92%" bottom="85%"/>
+ <space:Frame id="intro-bottom-b" within={canvas} left="8%" top="86%" right="92%" bottom="97%"/>
+ <space:Frame id="circle-pip" within={canvas} left="20%" top="33.125%" right="80%" bottom="66.875%"/>
+ <space:Frame id="scene-left-top" within={canvas} left="2%" top="27.125%" right="25%" bottom="36.125%"/>
+ <space:Frame id="scene-right-top" within={canvas} left="75%" top="27.125%" right="98%" bottom="36.125%"/>
+ <space:Frame id="scene-left-mid" within={canvas} left="2%" top="46.125%" right="25%" bottom="55.125%"/>
+ <space:Frame id="scene-right-mid" within={canvas} left="75%" top="46.125%" right="98%" bottom="55.125%"/>
+ <space:Frame id="scene-bottom" within={canvas} left="8%" top="70.125%" right="92%" bottom="81.125%"/>
+ <space:Frame id="presenter-pip" within={canvas} left="70%" top="69%" right="96%" bottom="83.625%"/>
+ <space:Frame id="product-title-band" within={canvas} left="5%" top="84%" right="95%" bottom="96%"/>
+ <space:Frame id="product-label-top" within={canvas} left="61%" top="29%" right="98%" bottom="38%"/>
+ <space:Frame id="product-label-side" within={canvas} left="2%" top="46%" right="32%" bottom="55%"/>
+ <space:Frame id="product-label-bottom" within={canvas} left="47%" top="62%" right="87%" bottom="71%"/>
+ <pipeline:Normalize id="prepared" source={source} video="primary-moving" audio="default" span-authority="video" clock={clock}/>
+ <pipeline:Normalize id="preparedProduct" source={productClose} video="primary-moving" audio="none" span-authority="video" clock={clock}/>
+ <picture:Track id="picture" timeline={timeline.timeline} canvas={canvas}>
+  <picture:Item id="s00" media={prepared.media} frame={full} start="0f" end="90f" appearance={look.media.p19}/>
+  <picture:Item id="s01" media={prepared.media} frame={intro-pip} start="90f" end="270f" appearance={look.media.p20}/>
+  <picture:Item id="s02" media={prepared.media} frame={full} start="270f" end="330f" appearance={look.media.p21}/>
+  <picture:Item id="s03" media={prepared.media} frame={circle-pip} start="330f" end="480f" appearance={look.media.p22}/>
+  <picture:Item id="s04" media={prepared.media} frame={full} start="480f" end="720f" appearance={look.media.p23}/>
+  <picture:Item id="s05" media={preparedProduct.media} frame={full} start="720f" end="900f" appearance={look.media.product-close}/>
+  <picture:Item id="s05pip" media={prepared.media} frame={presenter-pip} start="720f" end="900f" appearance={look.media.presenter-pip}/>
+  <picture:Item id="s06" media={prepared.media} frame={full} start="900f" end="1020f" appearance={look.media.p26}/>
+  <picture:Item id="s07" media={prepared.media} frame={full} start="1020f" end="1089f" appearance={look.media.p27}/>
+ </picture:Track>
+ <audio:Track id="voice" timeline={timeline.timeline}>
+  <audio:Item id="a01" source={prepared.media} start="0f" end="1089f" trim-start="988f" trim-end="2077f" playback="once" gain="1"/>
+ </audio:Track>
+ <typo:Style id="key-style" recipe={look.text.key} font={font}>
+  <typo:Stroke color="#000000" width="3" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000CC" x="0" y="4" blur="6"/>
+ </typo:Style>
+ <typo:Style id="caption-style" recipe={look.text.caption} font={font}>
+  <typo:Stroke color="#000000" width="3.2" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000DD" x="0" y="4" blur="6"/>
+ </typo:Style>
+ <typo:Style id="intro-top-style" recipe={look.text.t01} font={font}>
+  <typo:Stroke color="#000000" width="3" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000CC" x="0" y="4" blur="6"/>
+ </typo:Style>
+ <typo:Style id="intro-bottom-style" recipe={look.text.t02} font={font}>
+  <typo:Stroke color="#000000" width="3.4" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000DD" x="0" y="5" blur="7"/>
+ </typo:Style>
+ <typo:Style id="scene-style" recipe={look.text.s01} font={font}>
+  <typo:Stroke color="#000000" width="3.2" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000DD" x="0" y="4" blur="6"/>
+ </typo:Style>
+ <typo:Style id="scene-strong-style" recipe={look.text.s02} font={font}>
+  <typo:Stroke color="#000000" width="3.6" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000DD" x="0" y="5" blur="7"/>
+ </typo:Style>
+ <typo:Style id="product-label-style" recipe={look.text.p01} font={font}>
+  <typo:Stroke color="#000000" width="3.2" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000DD" x="0" y="4" blur="6"/>
+ </typo:Style>
+ <typo:Style id="product-title-style" recipe={look.text.p02} font={font}>
+  <typo:Stroke color="#000000" width="4.2" placement="outside"/><typo:Fill color="#FFFFFF"/><typo:Shadow color="#000000EE" x="0" y="6" blur="8"/>
+ </typo:Style>
+ <typo:Motion id="pop"><typo:ItemKeyframe at="0" opacity="0" y="12" scale="0.94"/><typo:ItemKeyframe at="7" opacity="1" y="0" scale="1" easing="ease-out"/></typo:Motion>
+ <typo:Motion id="follow-top">
+  <typo:ItemKeyframe at="0" x="-180" y="48" opacity="0" scale="0.94"/>
+  <typo:ItemKeyframe at="8" x="-130" y="40" opacity="1" scale="1" easing="ease-out"/>
+  <typo:ItemKeyframe at="42" x="20" y="10" opacity="1" easing="ease-in-out"/>
+  <typo:ItemKeyframe at="78" x="90" y="-8" opacity="1" easing="ease-in-out"/>
+  <typo:ItemKeyframe at="100" x="110" y="0" opacity="1" easing="ease-in-out"/>
+ </typo:Motion>
+ <typo:Motion id="follow-side">
+  <typo:ItemKeyframe at="0" x="100" y="64" opacity="0" scale="0.94"/>
+  <typo:ItemKeyframe at="8" x="70" y="42" opacity="1" scale="1" easing="ease-out"/>
+  <typo:ItemKeyframe at="50" x="-18" y="2" opacity="1" easing="ease-in-out"/>
+  <typo:ItemKeyframe at="100" x="-82" y="-20" opacity="1" easing="ease-in-out"/>
+ </typo:Motion>
+ <typo:Motion id="follow-top-alt">
+  <typo:ItemKeyframe at="0" x="-120" y="42" opacity="0" scale="0.94"/>
+  <typo:ItemKeyframe at="8" x="-82" y="28" opacity="1" scale="1" easing="ease-out"/>
+  <typo:ItemKeyframe at="48" x="18" y="-2" opacity="1" easing="ease-in-out"/>
+  <typo:ItemKeyframe at="82" x="100" y="-22" opacity="1" easing="ease-in-out"/>
+ </typo:Motion>
+ <typo:Motion id="follow-bottom">
+  <typo:ItemKeyframe at="0" x="-92" y="26" opacity="0" scale="0.96"/>
+  <typo:ItemKeyframe at="6" x="-60" y="18" opacity="1" scale="1" easing="ease-out"/>
+  <typo:ItemKeyframe at="20" x="18" y="0" opacity="1" easing="ease-in-out"/>
+  <typo:ItemKeyframe at="32" x="80" y="-8" opacity="1" easing="ease-in-out"/>
+ </typo:Motion>
+ <typo:Track id="introText" timeline={timeline.timeline}>
+  <typo:Area id="i01" placement={intro-top} style={intro-top-style} motion={pop} at="90f" for="180f">下午临时要约会</typo:Area>
+  <typo:Area id="i02" placement={intro-bottom-a} style={intro-bottom-style} motion={pop} at="102f" for="168f">阿玛尼 红挚爱</typo:Area>
+  <typo:Area id="i03" placement={intro-bottom-b} style={intro-bottom-style} motion={pop} at="102f" for="168f">更有女人味</typo:Area>
+ </typo:Track>
+ <typo:Track id="keywords" timeline={timeline.timeline}>
+  <typo:Area id="k01" placement={key-top} style={key-style} motion={pop} at="274f" for="52f">喷在衣服外侧很适合</typo:Area>
+ </typo:Track>
+ <typo:Track id="sceneText" timeline={timeline.timeline}>
+  <typo:Area id="q01" placement={scene-left-top} style={scene-style} motion={pop} at="330f" for="150f">约会</typo:Area>
+  <typo:Area id="q02" placement={scene-right-top} style={scene-style} motion={pop} at="330f" for="150f">晚餐</typo:Area>
+  <typo:Area id="q03" placement={scene-left-mid} style={scene-style} motion={pop} at="330f" for="150f">电影</typo:Area>
+  <typo:Area id="q04" placement={scene-right-mid} style={scene-style} motion={pop} at="330f" for="150f">夜晚</typo:Area>
+  <typo:Area id="q05" placement={scene-bottom} style={scene-strong-style} motion={pop} at="330f" for="150f">红挚爱 | 黑鸦片</typo:Area>
+  <typo:Area id="q06" placement={product-title-band} style={product-title-style} motion={pop} at="720f" for="70f">慢慢变得醇厚</typo:Area>
+  <typo:Area id="q07" placement={product-title-band} style={product-title-style} motion={pop} at="795f" for="105f">夜晚氛围更明显</typo:Area>
+ </typo:Track>
+ <typo:Track id="productLabels" timeline={timeline.timeline}>
+  <typo:Area id="l01" placement={product-label-top} style={product-label-style} motion={follow-top} at="490f" for="55f">红挚爱 明媚果香</typo:Area>
+  <typo:Area id="l02" placement={product-label-side} style={product-label-style} motion={follow-side} at="545f" for="55f">玫瑰茉莉 香草木</typo:Area>
+  <typo:Area id="l03" placement={product-label-top} style={product-label-style} motion={follow-top-alt} at="600f" for="55f">YSL 黑鸦片</typo:Area>
+  <typo:Area id="l04" placement={product-label-bottom} style={product-label-style} motion={follow-bottom} at="655f" for="65f">黑咖啡 茉莉 橙花 香草</typo:Area>
+  <typo:Area id="l05" placement={product-label-top} style={product-label-style} motion={follow-top-alt} at="914f" for="76f">少量分区喷</typo:Area>
+  <typo:Area id="l06" placement={product-label-bottom} style={product-label-style} motion={follow-bottom} at="1005f" for="84f">更自然 更耐闻</typo:Area>
+ </typo:Track>
+ <typo:Track id="captions" timeline={timeline.timeline}>
+  <typo:Area id="c01" placement={caption-band} style={caption-style} at="142f" for="50f">明媚果香 更有女人味</typo:Area>
+  <typo:Area id="c02" placement={caption-band} style={caption-style} at="207f" for="45f">玫瑰茉莉 香草木</typo:Area>
+ </typo:Track>
+ <film:Film id="main" canvas={canvas} timeline={timeline.timeline} appearance={look.film.main}>
+  <film:Track source={picture.visual}/>
+  <film:Track source={voice.audio}/>
+  <film:Track source={introText.track}/>
+  <film:Track source={sceneText.track}/>
+  <film:Track source={keywords.track}/>
+  <film:Track source={productLabels.track}/>
+  <film:Track source={captions.track}/>
+ </film:Film>
+ <render:Video id="final" composition={main.composition} timeline={timeline.timeline}/>
+</svml>

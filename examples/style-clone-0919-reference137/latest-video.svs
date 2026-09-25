@@ -1,0 +1,12 @@
+<?svml using="@hypit/svs@1"?>
+<sheet version="1">
+  film.main { background: #f8f5ef; }
+  media.shot1 { stack-order: 0; fit: contain; playback: once-start; trim-start: 0; trim-end: 90; }
+  media.shot2 { stack-order: 0; fit: contain; playback: once-start; trim-start: 90; trim-end: 165; }
+  media.shot3 { stack-order: 0; fit: contain; playback: once-start; trim-start: 165; trim-end: 270; }
+  media.shot4 { stack-order: 0; fit: contain; playback: once-start; trim-start: 270; trim-end: 360; }
+  media.shot5 { stack-order: 0; fit: contain; playback: once-start; trim-start: 360; trim-end: 465; }
+  media.shot6 { stack-order: 0; fit: contain; playback: once-start; trim-start: 465; trim-end: 534; }
+  media.shot7 { stack-order: 0; fit: contain; playback: once-start; trim-start: 534; trim-end: 600; }
+</sheet>
+

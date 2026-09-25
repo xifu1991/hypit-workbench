@@ -189,6 +189,9 @@ importers:
       '@hypit/provider-media-local':
         specifier: workspace:*
         version: link:packages/provider-media-local
+      '@hypit/provider-volc-asr':
+        specifier: workspace:*
+        version: link:packages/provider-volc-asr
       '@hypit/provider-whisperx-local':
         specifier: workspace:*
         version: link:packages/provider-whisperx-local
@@ -267,6 +270,9 @@ importers:
       '@hypit/studio-adapter':
         specifier: workspace:*
         version: link:packages/studio-adapter
+      '@hypit/style-library':
+        specifier: workspace:*
+        version: link:packages/style-library
       '@hypit/svs':
         specifier: workspace:*
         version: link:packages/svs
@@ -2318,6 +2324,24 @@ importers:
         specifier: workspace:*
         version: link:../driver-node
 
+  packages/provider-volc-asr:
+    dependencies:
+      '@hypit/endpoint-kit':
+        specifier: workspace:*
+        version: link:../endpoint-kit
+      '@hypit/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@hypit/runtime-kit':
+        specifier: workspace:*
+        version: link:../runtime-kit
+      '@hypit/speech-evidence':
+        specifier: workspace:*
+        version: link:../speech-evidence
+      '@hypit/whisperx':
+        specifier: workspace:*
+        version: link:../whisperx
+
   packages/provider-whisperx-local:
     dependencies:
       '@hypit/endpoint-kit':
@@ -3061,6 +3085,9 @@ importers:
       '@hypit/studio-adapter':
         specifier: workspace:*
         version: link:../studio-adapter
+      '@hypit/style-library':
+        specifier: workspace:*
+        version: link:../style-library
       '@hypit/svs':
         specifier: workspace:*
         version: link:../svs
@@ -3097,6 +3124,8 @@ importers:
       '@hypit/protocol':
         specifier: workspace:*
         version: link:../protocol
+
+  packages/style-library: {}
 
   packages/svs:
     dependencies:

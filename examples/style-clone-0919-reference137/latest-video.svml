@@ -1,0 +1,47 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="pipeline" from="@hypit/media-pipeline@1"/>
+  <import as="picture" from="@hypit/media-track@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="spatial" from="@hypit/spatial@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./latest-video.svs"/>
+  <media:Video id="latest-finished-video" src="../../../outputs/0919_reference137_20s/0919_reference137_20s.mp4"/>
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="20s"/>
+  <spatial:Canvas id="canvas" width="720" height="1280"/>
+  <spatial:Frame id="frame-1" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <spatial:Frame id="frame-2" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <spatial:Frame id="frame-3" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <spatial:Frame id="frame-4" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <spatial:Frame id="frame-5" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <spatial:Frame id="frame-6" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <spatial:Frame id="frame-7" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+  <pipeline:Normalize id="prepared" source={latest-finished-video} clock={clock} video="primary-moving" audio="default" span-authority="video"/>
+  <picture:Track id="latest-video-clips" timeline={edit.timeline} canvas={canvas}>
+    <picture:Item id="shot-1" media={prepared.media} frame={frame-1} start="0s" end="3s" appearance={look.media.shot1}/>
+    <picture:Item id="shot-2" media={prepared.media} frame={frame-2} start="3s" end="5.5s" appearance={look.media.shot2}/>
+    <picture:Item id="shot-3" media={prepared.media} frame={frame-3} start="5.5s" end="9s" appearance={look.media.shot3}/>
+    <picture:Item id="shot-4" media={prepared.media} frame={frame-4} start="9s" end="12s" appearance={look.media.shot4}/>
+    <picture:Item id="shot-5" media={prepared.media} frame={frame-5} start="12s" end="15.5s" appearance={look.media.shot5}/>
+    <picture:Item id="shot-6" media={prepared.media} frame={frame-6} start="15.5s" end="17.8s" appearance={look.media.shot6}/>
+    <picture:Item id="shot-7" media={prepared.media} frame={frame-7} start="17.8s" end="20s" appearance={look.media.shot7}/>
+  </picture:Track>
+  <audio:Track id="original-audio" timeline={edit.timeline}>
+    <audio:Item id="voice-1" source={prepared.media} start="0s" end="3s" trim-start="0s" trim-end="3s" playback="once" gain="1"/>
+    <audio:Item id="voice-2" source={prepared.media} start="3s" end="5.5s" trim-start="3s" trim-end="5.5s" playback="once" gain="1"/>
+    <audio:Item id="voice-3" source={prepared.media} start="5.5s" end="9s" trim-start="5.5s" trim-end="9s" playback="once" gain="1"/>
+    <audio:Item id="voice-4" source={prepared.media} start="9s" end="12s" trim-start="9s" trim-end="12s" playback="once" gain="1"/>
+    <audio:Item id="voice-5" source={prepared.media} start="12s" end="15.5s" trim-start="12s" trim-end="15.5s" playback="once" gain="1"/>
+    <audio:Item id="voice-6" source={prepared.media} start="15.5s" end="17.8s" trim-start="15.5s" trim-end="17.8s" playback="once" gain="1"/>
+    <audio:Item id="voice-7" source={prepared.media} start="17.8s" end="20s" trim-start="17.8s" trim-end="20s" playback="once" gain="1"/>
+  </audio:Track>
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={latest-video-clips.visual}/>
+    <film:Track source={original-audio.audio}/>
+  </film:Film>
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

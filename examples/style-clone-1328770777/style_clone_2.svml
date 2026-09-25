@@ -1,0 +1,26 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="spatial" from="@hypit/spatial@1"/>
+  <import as="styleboard" from="@example/style-board@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./style_clone_2.svs"/>
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="25s"/>
+  <spatial:Canvas id="canvas" width="720" height="1280"/>
+  <styleboard:Board id="style-clone-2" timeline={edit.timeline} canvas={canvas}
+    during="program"
+    title="2｜25秒风格小样"
+    subtitle="开场钩子、露脸/产品穿插、气质关键词、选香三步和 CTA"
+    open="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets2/open.jpg"
+    product="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets2/product.jpg"
+    face="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets2/face.jpg"
+    circle="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets2/circle.jpg"
+    notes="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets2/notes.jpg"
+    final="C:/Users/admin/Documents/视频制作/hypit-local-demo/examples/style-clone-1328770777/assets2/final.jpg"/>
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={style-clone-2.track}/>
+  </film:Film>
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

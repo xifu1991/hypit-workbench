@@ -45,6 +45,7 @@ const paths: Readonly<Record<string, string>> = {
   layers: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/>',
   ranking: '<path d="M5 19V9h4v10M10 19V5h4v14M15 19v-7h4v7M3 19h18"/>',
   refresh: '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M18.5 9a7 7 0 0 0-11.8-2.3L4 9M5.5 15a7 7 0 0 0 11.8 2.3L20 15"/>',
+  download: '<path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 21h14"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
   alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
   arrowRight: '<path d="M5 12h14m-6-6 6 6-6 6"/>',

@@ -1,5 +1,5 @@
 import { fileReferenceIdentity } from "@hypit/build-result";
-import { isAbsolute, relative, resolve, sep } from "node:path";
+import { extname, isAbsolute, relative, resolve, sep } from "node:path";
 
 import { buildIdCreatedAt } from "@hypit/protocol";
 import type { BuildView, NodeRuntimeHost, RuntimeHostTransientExecution } from "@hypit/runtime-host-node";
@@ -11,13 +11,19 @@ import type {
   FinishedBuildResultManifest,
 } from "@hypit/build-result";
 
-import { resolveBuildResultValue } from "@hypit/cli";
+import { resolveBuildResultValue, runCli } from "@hypit/cli";
 import { videoCliDistribution } from "@hypit/video-cli";
 
 import type { StudioArtifactView, StudioLibraryRequest, StudioLibraryView, StudioTaskView } from "./shared.js";
 import { mergeStudioArtifacts } from "./library-media.js";
 
 type RuntimeControl = Awaited<ReturnType<NodeRuntimeHost["openControl"]>>;
+
+export type StudioExportView = {
+  readonly build: string;
+  readonly output: string;
+  readonly filename: string;
+};
 
 export type StudioBuildLibrary = {
   readonly profile?: string;
@@ -40,8 +46,11 @@ export type StudioBuildLibrary = {
   ) => Promise<{
     readonly mediaType: string;
     readonly size: number;
+    readonly filename: string;
     open(range?: BuildResultFileRange): Promise<AsyncIterable<Uint8Array> | undefined>;
   } | undefined>;
+  /** Run the current Run source through the selected Runtime and return its full video Output. */
+  readonly exportVideo: (run: string) => Promise<StudioExportView>;
   readonly close: () => Promise<void>;
 };
 
@@ -121,6 +130,35 @@ function resultTaskView(root: string, result: FinishedBuildResultManifest): Stud
 
 function isMedia(mediaType: string): boolean {
   return /^(image|video|audio)\//u.test(mediaType);
+}
+
+function mediaExtension(mediaType: string): string {
+  if (mediaType === "video/mp4") return ".mp4";
+  if (mediaType === "video/webm") return ".webm";
+  if (mediaType === "video/quicktime") return ".mov";
+  if (mediaType === "audio/mpeg") return ".mp3";
+  if (mediaType === "audio/wav" || mediaType === "audio/x-wav") return ".wav";
+  if (mediaType === "image/png") return ".png";
+  if (mediaType === "image/jpeg") return ".jpg";
+  return "";
+}
+
+function artifactFilename(name: string, mediaType: string, path?: string): string {
+  if (extname(name).length > 0) return name;
+  return `${name}${mediaExtension(mediaType) || (path === undefined ? "" : extname(path))}`;
+}
+
+async function fullVideoOutput(repository: BuildResultRepository, build: string): Promise<string | undefined> {
+  const manifest = await repository.read(build);
+  if (manifest?.outcome !== "complete") return undefined;
+  const preferred = manifest.targets.includes("final.video")
+    ? ["final.video", ...Object.keys(manifest.outputs).filter((output) => output !== "final.video")]
+    : [...Object.keys(manifest.outputs)];
+  for (const output of preferred) {
+    const description = await repository.describeOutput(build, output);
+    if (description?.kind === "resource" && description.mediaType.startsWith("video/")) return output;
+  }
+  return undefined;
 }
 
 async function artifactsForResults(
@@ -252,6 +290,7 @@ export async function openStudioBuildLibrary(
   }
   const results = openedResults.repository;
   let presentationWrite: Promise<unknown> = Promise.resolve();
+  let exportPending: Promise<StudioExportView> | undefined;
   return {
     ...(resolvedProfile === undefined ? {} : { profile: resolvedProfile }),
     ...(runtime === undefined ? {} : { runtime }),
@@ -281,11 +320,80 @@ export async function openStudioBuildLibrary(
       if (resolved === undefined) return undefined;
       if ((resolved.value.kind !== "build-file" && resolved.value.kind !== "external-file") || !isMedia(resolved.value.mediaType)) return undefined;
       const file = resolved.value;
+      const manifest = await results.read(build);
+      const name = manifest?.outputs[output]?.displayName ?? output;
       return {
         mediaType: file.mediaType,
         size: file.size,
+        filename: artifactFilename(name, file.mediaType, file.kind === "build-file" ? file.path : undefined),
         open: async (range) => await results.openFile(resolved.build, file, range),
       };
+    },
+    async exportVideo(run) {
+      if (resolvedProfile === undefined) throw new Error("Studio has no Runtime Profile selected.");
+      if (exportPending !== undefined) throw new Error("A Studio export is already running.");
+      const pending = (async () => {
+        let stdout = "";
+        let progress = "";
+        let exitCode: number | undefined;
+        const title = `Studio export ${new Date().toISOString().replace(/[:.]/gu, "-")}`;
+        await runCli([
+          "build",
+          resolve(run),
+          "--runtime",
+          resolvedProfile,
+          "--workspace",
+          workspaceRoot,
+          "--package-root",
+          packageRoot,
+          "--title",
+          title,
+          "--follow",
+          "--json",
+          "--color",
+          "never",
+        ], {
+          write(text) { stdout += text; },
+          writeProgress(text) { progress += text; },
+          setExitCode(code) { exitCode = code; },
+        }, videoCliDistribution);
+
+        const machine = JSON.parse(stdout) as {
+          readonly build?: {
+            readonly id?: string;
+            readonly failure?: string;
+            readonly attention?: { readonly message?: string };
+            readonly work?: { readonly outcome?: string };
+            readonly result?: { readonly state?: string };
+          };
+        };
+        const build = machine.build;
+        if (build?.id === undefined) throw new Error("The export Build did not return an identity.");
+        if (exitCode !== undefined || build.work?.outcome !== "complete" || build.result?.state !== "complete") {
+          throw new Error(build.failure ?? build.attention?.message ?? (progress.trim() || "The export Build did not complete."));
+        }
+        const output = await fullVideoOutput(results, build.id);
+        if (output === undefined) throw new Error("The export Build completed without a full video Output.");
+        const resolved = await results.resolve(build.id, output);
+        if (resolved === undefined) throw new Error("The export video Output is unavailable.");
+        if (resolved.value.kind !== "build-file" && resolved.value.kind !== "external-file") {
+          throw new Error("The export video Output is not a file.");
+        }
+        const manifest = await results.read(build.id);
+        const name = manifest?.outputs[output]?.displayName ?? output;
+        return {
+          build: build.id,
+          output,
+          filename: artifactFilename(name, resolved.value.mediaType,
+            resolved.value.kind === "build-file" ? resolved.value.path : undefined),
+        };
+      })();
+      exportPending = pending;
+      try {
+        return await pending;
+      } finally {
+        if (exportPending === pending) exportPending = undefined;
+      }
     },
     async close() {
       await openedResults.close();

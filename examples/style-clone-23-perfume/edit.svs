@@ -1,0 +1,42 @@
+<?svml using="@hypit/svs@1"?>
+<sheet version="1">
+ film.main { background: #000000; }
+ media.p19 { stack-order: 0; fit: cover; playback: once-start; trim-start: 0; trim-end: 75; }
+ media.p20 { stack-order: 0; fit: cover; playback: once-start; trim-start: 75; trim-end: 195; }
+ media.p21 { stack-order: 0; fit: cover; playback: once-start; trim-start: 195; trim-end: 240; }
+ media.p22 { stack-order: 0; fit: cover; fit-offset-y: 30; playback: once-start; trim-start: 240; trim-end: 333; clip: rounded; radius: 216; border-width: 6; border-style: solid; border-color: #FFFFFF; shadows: "0 10 24 0 #000000AA"; }
+ media.p23 { stack-order: 0; fit: cover; playback: once-start; trim-start: 333; trim-end: 450; }
+ media.p24 { stack-order: 0; fit: cover; playback: once-start; trim-start: 450; trim-end: 566; }
+ media.product-close { stack-order: 0; fit: cover; playback: once-start; trim-start: 5; trim-end: 100; }
+ media.presenter-pip { stack-order: 10; fit: cover; fit-offset-y: 30; playback: once-start; trim-start: 566; trim-end: 666; clip: rounded; radius: 94; border-width: 4; border-style: solid; border-color: #FFFFFF; shadows: "0 8 20 0 #000000BB"; }
+ media.p26 { stack-order: 0; fit: cover; playback: once-start; trim-start: 666; trim-end: 780; }
+ media.p27 { stack-order: 0; fit: cover; fit-offset-y: 30; playback: once-start; trim-start: 780; trim-end: 866; clip: rounded; radius: 216; border-width: 6; border-style: solid; border-color: #FFFFFF; shadows: "0 10 24 0 #000000AA"; }
+ media.p28 { stack-order: 0; fit: cover; playback: once-start; trim-start: 866; trim-end: 900; }
+ media.full { stack-order: 0; fit: cover; playback: once-start; }
+ media.p01 { stack-order: 0; fit: cover; playback: once-start; trim-start: 195; trim-end: 341; }
+ media.p02 { stack-order: 0; fit: cover; playback: once-start; trim-start: 458; trim-end: 570; }
+ media.p03 { stack-order: 0; fit: cover; playback: once-start; trim-start: 570; trim-end: 681; }
+ media.p04 { stack-order: 0; fit: cover; playback: once-start; trim-start: 763; trim-end: 866; }
+ media.p05 { stack-order: 0; fit: cover; playback: once-start; trim-start: 945; trim-end: 1065; }
+ media.p06 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1065; trim-end: 1183; }
+ media.p07 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1320; trim-end: 1415; }
+ media.p08 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1415; trim-end: 1508; }
+ media.p09 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1592; trim-end: 1685; }
+ media.p10 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1685; trim-end: 1781; }
+ media.p11 { stack-order: 0; fit: cover; playback: once-start; trim-start: 1845; trim-end: 1956; }
+ media.p12 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2025; trim-end: 2100; }
+ media.p13 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2100; trim-end: 2179; }
+ media.p14 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2265; trim-end: 2417; }
+ media.p15 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2475; trim-end: 2619; }
+ media.p16 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2726; trim-end: 2850; }
+ media.p17 { stack-order: 0; fit: cover; playback: once-start; trim-start: 2850; trim-end: 2970; }
+ media.p18 { stack-order: 0; fit: cover; playback: once-start; trim-start: 3049; trim-end: 3179; }
+ text.key { stack-order: 40; size: 42; weight: 900; align: center; block-align: center; line-height: 1.15; }
+ text.caption { stack-order: 50; size: 40; weight: 900; align: center; block-align: center; line-height: 1.22; }
+ text.t01 { stack-order: 60; size: 50; weight: 900; align: center; block-align: center; line-height: 1.05; }
+ text.t02 { stack-order: 61; size: 74; weight: 900; align: center; block-align: center; line-height: 1.02; }
+ text.s01 { stack-order: 62; size: 42; weight: 900; align: center; block-align: center; line-height: 1.02; }
+ text.s02 { stack-order: 63; size: 66; weight: 900; align: center; block-align: center; line-height: 1.02; }
+ text.p01 { stack-order: 64; size: 36; weight: 900; align: center; block-align: center; line-height: 1.05; wrap: none; }
+ text.p02 { stack-order: 65; size: 86; weight: 900; align: center; block-align: center; line-height: 1.0; wrap: none; }
+</sheet>
