@@ -13,8 +13,10 @@ import { createSidebarPanel, sidebarItem } from "./sidebar-panel.js";
 import { icon } from "./icons.js";
 import { mergeStudioArtifacts } from "../library-media.js";
 import { createStylesPane } from "./styles.js";
+import { createStickersPane } from "./stickers.js";
 
 type LibrarySection = "source" | "styles" | "tasks" | "artifacts";
+type ArtifactFilter = "all" | "video" | "image" | "audio" | "stickers";
 
 export type LibraryPane = {
   readonly element: HTMLElement;
@@ -290,6 +292,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   element.querySelector('[data-library-view="source"]')!.append(sourcePanel.element);
   const stylesPane = createStylesPane();
   element.querySelector('[data-library-view="styles"]')!.append(stylesPane.element);
+  const stickersPane = createStickersPane();
   const taskPanel = createSidebarPanel("panel", "library.task-categories");
   uiAttr(taskPanel.navigation, "aria-label", "library.task-categories");
   taskPanel.toolbar.innerHTML = `<span class="code-location" data-task-heading>${uiLabel("library.all-tasks")}</span><div class="task-context" data-task-context hidden></div>
@@ -300,10 +303,11 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   uiAttr(mediaPanel.navigation, "aria-label", "library.media-categories");
   mediaPanel.toolbar.innerHTML = `<span class="code-location" data-media-heading>${uiLabel("library.all-media")}</span><div class="task-context" data-task-context hidden></div>
     <button type="button" class="library-refresh" data-library-refresh ${uiAttribute("aria-label", "library.refresh-media")} ${uiAttribute("title", "common.refresh")}>${icon("refresh")}</button>`;
-  mediaPanel.content.innerHTML = `<div class="media-status" data-library-status="artifacts" role="status" hidden></div><div class="artifact-grid" data-artifact-grid></div>`;
+  mediaPanel.content.innerHTML = `<div class="artifact-content" data-artifact-content><div class="media-status" data-library-status="artifacts" role="status" hidden></div><div class="artifact-grid" data-artifact-grid></div></div>`;
   element.querySelector('[data-library-view="artifacts"]')!.append(mediaPanel.element);
   const sourceList = sourcePanel.navigation;
   const taskList = element.querySelector<HTMLElement>("[data-task-list]")!;
+  const artifactContent = element.querySelector<HTMLElement>("[data-artifact-content]")!;
   const artifactGrid = element.querySelector<HTMLElement>("[data-artifact-grid]")!;
   const artifactFilters = mediaPanel.navigation;
   let snapshot: StudioSnapshot | undefined;
@@ -311,7 +315,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   let active: LibrarySection = "source";
   const libraries: Partial<Record<"tasks" | "artifacts", StudioLibraryView>> = {};
   let taskFilter: "all" | "ongoing" | "finished" = "all";
-  let artifactFilter = "all";
+  let artifactFilter: ArtifactFilter = "all";
   let selectedArtifact: string | undefined;
   let selectedTask: StudioTaskView | undefined;
   let request: AbortController | undefined;
@@ -456,24 +460,48 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   const renderArtifacts = (): void => {
     videoPreviews.disconnect();
     for (const node of Array.from(artifactGrid.querySelectorAll("[data-more-section]"))) morePages.unobserve(node);
-    const cards = new Map(Array.from(artifactGrid.querySelectorAll<HTMLElement>("[data-artifact-id]"), (card) => [card.dataset.artifactId!, card]));
-    const library = libraries.artifacts;
-    const artifacts = library?.artifacts ?? [];
-    const filters = [["all", "library.all-media", "component"], ["video", "library.videos", "video"], ["image", "library.images", "image"], ["audio", "library.audio", "waveform"]] as const;
     const heading = mediaPanel.toolbar.querySelector<HTMLElement>("[data-media-heading]")!;
-    uiText(heading, filters.find(([id]) => id === artifactFilter)?.[1] ?? "library.all-media");
-    uiAttr(heading, "title", "library.media-category");
-    renderTaskContext();
+    const filters = [["all", "library.all-media", "component"], ["video", "library.videos", "video"], ["image", "library.images", "image"], ["audio", "library.audio", "waveform"], ["stickers", "library.stickers", "sticker"]] as const;
     artifactFilters.replaceChildren(...filters.map(([id, label, mark]) => localizedSidebarItem({
       label, icon: mark, selected: id === artifactFilter,
       select: () => {
         artifactFilter = id;
-        delete libraries.artifacts;
         artifactGrid.scrollTop = 0;
-        void refresh("artifacts");
+        if (id === "stickers") {
+          renderArtifacts();
+          stickersPane.activate();
+          return;
+        }
+        delete libraries.artifacts;
         renderArtifacts();
+        void refresh("artifacts");
       },
     })));
+    if (artifactFilter === "stickers") {
+      uiText(heading, "library.stickers");
+      uiAttr(heading, "title", "library.media-category");
+      const refreshButton = mediaPanel.toolbar.querySelector<HTMLButtonElement>("[data-library-refresh]")!;
+      uiAttr(refreshButton, "aria-label", "library.refresh-stickers");
+      uiAttr(refreshButton, "title", "common.refresh");
+      for (const node of Array.from(element.querySelectorAll<HTMLElement>("[data-task-context]"))) {
+        node.hidden = true;
+        node.replaceChildren();
+        node.dataset.taskId = "";
+      }
+      mediaPanel.content.replaceChildren(stickersPane.element);
+      stickersPane.activate();
+      return;
+    }
+    if (artifactContent.parentElement !== mediaPanel.content) mediaPanel.content.replaceChildren(artifactContent);
+    const refreshButton = mediaPanel.toolbar.querySelector<HTMLButtonElement>("[data-library-refresh]")!;
+    uiAttr(refreshButton, "aria-label", "library.refresh-media");
+    uiAttr(refreshButton, "title", "common.refresh");
+    const cards = new Map(Array.from(artifactGrid.querySelectorAll<HTMLElement>("[data-artifact-id]"), (card) => [card.dataset.artifactId!, card]));
+    const library = libraries.artifacts;
+    const artifacts = library?.artifacts ?? [];
+    uiText(heading, filters.find(([id]) => id === artifactFilter)?.[1] ?? "library.all-media");
+    uiAttr(heading, "title", "library.media-category");
+    renderTaskContext();
     const shown = artifactFilter === "all" ? artifacts
       : artifacts.filter((artifact) => artifact.mediaType.startsWith(`${artifactFilter}/`));
     const entries: HTMLElement[] = shown.map((artifact) => {
@@ -518,7 +546,8 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     if (next === "artifacts") renderArtifacts();
     if (next === "tasks") renderTasks();
     if (next === "styles") stylesPane.activate();
-    if ((next === "tasks" || next === "artifacts") && reload) void refresh(next);
+    if (next === "artifacts" && artifactFilter === "stickers") stickersPane.activate();
+    else if ((next === "tasks" || next === "artifacts") && reload) void refresh(next);
     else request?.abort();
   };
 
@@ -534,7 +563,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     try {
       const query = new URLSearchParams({ section });
       if (before !== undefined) query.set("before", before);
-      if (section === "artifacts" && artifactFilter !== "all") query.set("media", artifactFilter);
+      if (section === "artifacts" && artifactFilter !== "all" && artifactFilter !== "stickers") query.set("media", artifactFilter);
       if (section === "artifacts" && selectedTask !== undefined) query.set("build", selectedTask.id);
       const response = await fetch(`/__studio/library?${query.toString()}`, { signal: controller.signal });
       const value = await response.json() as StudioLibraryView | { readonly error: string };
@@ -575,7 +604,10 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     });
   }
   for (const button of Array.from(element.querySelectorAll<HTMLButtonElement>("[data-library-refresh]"))) {
-    button.addEventListener("click", () => { if (active === "tasks" || active === "artifacts") void refresh(active); });
+    button.addEventListener("click", () => {
+      if (active === "artifacts" && artifactFilter === "stickers") void stickersPane.refresh();
+      else if (active === "tasks" || active === "artifacts") void refresh(active);
+    });
   }
 
   return {
@@ -584,9 +616,12 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     show(value) {
       snapshot = value;
       renderSources();
+      stylesPane.show(value);
+      stickersPane.show(value);
     },
     refresh: async () => {
       if (active === "styles") await stylesPane.refresh();
+      else if (active === "artifacts" && artifactFilter === "stickers") await stickersPane.refresh();
       else if (active !== "source") await refresh(active);
     },
   };

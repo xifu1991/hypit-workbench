@@ -11,6 +11,7 @@ Open a Run in the browser to inspect its composition, Sources and Results.
   hypit studio --run <build.svrun> [--runtime <hypit.runtime.json>]
     [--port <number>] [--workspace <directory>] [--package-root <directory>]
     [--style-library <directory>]
+    [--sticker-library <directory>]
     [--locale-pack <./language.json | installed-package/language.json>]...
 
   hypit studio --check-locale <./language.json | installed-package/language.json>
@@ -25,6 +26,7 @@ the project, without rebasing those paths. Otherwise the nearest package.json
 above the current directory defines the project (or the current directory if none).
 Without --runtime, Studio uses that project's .hypit/runtime selection.
 The style library defaults to <workspace>/style-library or HYPIT_STYLE_LIBRARY.
+The sticker library defaults to <workspace>/sticker-library or HYPIT_STICKER_LIBRARY.
 The server prints its project, Run, Runtime selection and browser URL.
 Press Ctrl+C to stop it.
 `);
@@ -36,7 +38,7 @@ function invalidArguments(message: string): never {
 
 function argumentsByName(argv: readonly string[]): ReadonlyMap<string, readonly string[]> {
   const accepted = new Set([
-    "run", "runtime", "port", "workspace", "package-root", "style-library", "locale-pack", "check-locale",
+    "run", "runtime", "port", "workspace", "package-root", "style-library", "sticker-library", "locale-pack", "check-locale",
   ]);
   const result = new Map<string, string[]>();
   for (let index = 0; index < argv.length; index += 2) {
@@ -79,6 +81,10 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
   const styleLibraryRoot = styleLibraryArgument === undefined
     ? resolve(process.env.HYPIT_STYLE_LIBRARY ?? resolve(workspaceRoot, "style-library"))
     : resolve(invokedFrom, styleLibraryArgument);
+  const stickerLibraryArgument = values.get("sticker-library")?.at(-1);
+  const stickerLibraryRoot = stickerLibraryArgument === undefined
+    ? resolve(process.env.HYPIT_STICKER_LIBRARY ?? resolve(workspaceRoot, "sticker-library"))
+    : resolve(invokedFrom, stickerLibraryArgument);
   const { describeLanguagePack, loadLanguagePack, studioLanguages, studioLocalizationPlugin } = await import("./src/localization-node.js");
   const checkLocale = values.get("check-locale")?.at(-1);
   if (checkLocale !== undefined) {
@@ -96,6 +102,7 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
   const { loadStudioRun } = await import("./src/run.js");
   const { studioPlugin } = await import("./src/server.js");
   const { studioStyleLibraryPlugin } = await import("./src/style-library-server.js");
+  const { studioStickerLibraryPlugin } = await import("./src/sticker-library-server.js");
   const { studioFeedbackPlugin } = await import("./src/feedback-server.js");
   const { inspectStudioRun } = await import("./src/studio-preflight.js");
   const languages = await studioLanguages(values.get("locale-pack") ?? [], invokedFrom, packageRoot);
@@ -113,6 +120,7 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
     `  Runtime selection  ${runtimeArgument !== undefined
       ? "command argument (this session only)" : selectedRuntime?.selectionFile ?? "none"}`,
     `  Style library      ${styleLibraryRoot}`,
+    `  Sticker library    ${stickerLibraryRoot}`,
     ...(packageRoot === workspaceRoot ? [] : [`  Package root       ${packageRoot}`]),
     "",
   ].join("\n"));
@@ -162,13 +170,14 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
       // must therefore be readable for self-hosted fonts and other declared
       // Studio dependencies, while the author workspace remains separately
       // available for Source and material previews.
-      fs: { allow: [workspaceRoot, packageRoot, styleLibraryRoot, distributionPackageRoot, here] },
+      fs: { allow: [workspaceRoot, packageRoot, styleLibraryRoot, stickerLibraryRoot, distributionPackageRoot, here] },
     },
     plugins: [
       distributionImports,
       studioLocalizationPlugin(languages),
       studioFeedbackPlugin(workspaceRoot, runPath),
       studioStyleLibraryPlugin({ root: styleLibraryRoot, workspaceRoot }),
+      studioStickerLibraryPlugin({ root: stickerLibraryRoot, workspaceRoot }),
       studioPlugin({
       source,
       runPath,

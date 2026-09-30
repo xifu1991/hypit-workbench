@@ -4,6 +4,11 @@ import { join } from "node:path";
 
 import type { Plugin } from "vite";
 import { createStyleLibrary } from "@hypit/style-library";
+import {
+  recommendStylePlan,
+  type StylePlanDocument,
+  type StyleTimedWords,
+} from "./style-recommender.js";
 
 export type StudioStyleLibraryOptions = {
   readonly root: string;
@@ -96,6 +101,121 @@ function selectionIds(value: unknown): readonly string[] {
   return [...new Set(ids as string[])];
 }
 
+function recommendationRequest(value: unknown): {
+  readonly words: readonly StyleTimedWords[];
+  readonly durationSec: number;
+  readonly candidateIds?: readonly string[];
+  readonly sourceRevision?: number;
+  readonly sourcePath?: string;
+} {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Style recommendation request must be an object.");
+  }
+  const raw = value as Record<string, unknown>;
+  if (!Array.isArray(raw.words) || raw.words.length > 5_000
+    || typeof raw.durationSec !== "number" || !Number.isFinite(raw.durationSec) || raw.durationSec <= 0) {
+    throw new Error("Style recommendation input is invalid.");
+  }
+  const words = raw.words.map((item, index) => {
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+      throw new Error(`Style recommendation word ${index} is invalid.`);
+    }
+    const word = item as Record<string, unknown>;
+    if (typeof word.text !== "string" || word.text.length > 240
+      || typeof word.startSec !== "number" || !Number.isFinite(word.startSec) || word.startSec < 0
+      || typeof word.endSec !== "number" || !Number.isFinite(word.endSec) || word.endSec < word.startSec) {
+      throw new Error(`Style recommendation word ${index} is invalid.`);
+    }
+    return { text: word.text, startSec: word.startSec, endSec: word.endSec } satisfies StyleTimedWords;
+  });
+  let candidateIds: readonly string[] | undefined;
+  if (raw.candidateIds !== undefined) {
+    if (!Array.isArray(raw.candidateIds)
+      || raw.candidateIds.some((id) => typeof id !== "string" || !/^[a-z0-9][a-z0-9-]*$/u.test(id))) {
+      throw new Error("Style recommendation candidate ids are invalid.");
+    }
+    candidateIds = [...new Set(raw.candidateIds as string[])];
+  }
+  if (raw.sourceRevision !== undefined
+    && (typeof raw.sourceRevision !== "number" || !Number.isSafeInteger(raw.sourceRevision) || raw.sourceRevision < 0)) {
+    throw new Error("Style recommendation source revision is invalid.");
+  }
+  if (raw.sourcePath !== undefined && (typeof raw.sourcePath !== "string" || raw.sourcePath.length > 2_000)) {
+    throw new Error("Style recommendation source path is invalid.");
+  }
+  return {
+    words,
+    durationSec: raw.durationSec,
+    ...(candidateIds === undefined ? {} : { candidateIds }),
+    ...(raw.sourceRevision === undefined ? {} : { sourceRevision: raw.sourceRevision }),
+    ...(raw.sourcePath === undefined ? {} : { sourcePath: raw.sourcePath }),
+  };
+}
+
+function stylePlanDocument(value: unknown): StylePlanDocument {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Style plan must be an object.");
+  }
+  const raw = value as Record<string, unknown>;
+  const windowRange = raw.windowRangeSec;
+  if (raw.format !== "hypit.style-plan@1"
+    || typeof raw.durationSec !== "number" || !Number.isFinite(raw.durationSec) || raw.durationSec <= 0
+    || windowRange === null || typeof windowRange !== "object" || Array.isArray(windowRange)
+    || !Array.isArray(raw.windows)) {
+    throw new Error("Style plan has an unsupported format.");
+  }
+  const range = windowRange as Record<string, unknown>;
+  if (typeof range.min !== "number" || typeof range.max !== "number") {
+    throw new Error("Style plan window range is invalid.");
+  }
+  const windows = raw.windows.map((item, index) => {
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+      throw new Error(`Style plan window ${index} is invalid.`);
+    }
+    const window = item as Record<string, unknown>;
+    if (typeof window.index !== "number" || !Number.isSafeInteger(window.index)
+      || typeof window.startSec !== "number" || !Number.isFinite(window.startSec) || window.startSec < 0
+      || typeof window.endSec !== "number" || !Number.isFinite(window.endSec) || window.endSec <= window.startSec
+      || typeof window.styleId !== "string" || !/^[a-z0-9][a-z0-9-]*$/u.test(window.styleId)
+      || typeof window.styleName !== "string"
+      || typeof window.confidence !== "number" || !Number.isFinite(window.confidence)
+      || typeof window.reason !== "string"
+      || !Array.isArray(window.matchedTerms) || window.matchedTerms.some((term) => typeof term !== "string")
+      || typeof window.text !== "string") {
+      throw new Error(`Style plan window ${index} is invalid.`);
+    }
+    return {
+      index: window.index,
+      startSec: window.startSec,
+      endSec: window.endSec,
+      styleId: window.styleId,
+      styleName: window.styleName,
+      confidence: window.confidence,
+      reason: window.reason,
+      matchedTerms: window.matchedTerms as string[],
+      text: window.text,
+    };
+  });
+  if (raw.updatedAt !== null && typeof raw.updatedAt !== "string") {
+    throw new Error("Style plan updatedAt is invalid.");
+  }
+  if (raw.sourceRevision !== undefined && (typeof raw.sourceRevision !== "number" || !Number.isSafeInteger(raw.sourceRevision))) {
+    throw new Error("Style plan source revision is invalid.");
+  }
+  if (raw.sourcePath !== undefined && typeof raw.sourcePath !== "string") {
+    throw new Error("Style plan source path is invalid.");
+  }
+  return {
+    format: "hypit.style-plan@1",
+    updatedAt: raw.updatedAt,
+    durationSec: raw.durationSec,
+    windowRangeSec: { min: range.min, max: range.max },
+    ...(raw.sourceRevision === undefined ? {} : { sourceRevision: raw.sourceRevision }),
+    ...(raw.sourcePath === undefined ? {} : { sourcePath: raw.sourcePath }),
+    windows,
+  };
+}
+
 async function readRequestBody(request: import("node:http").IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
   for await (const chunk of request) chunks.push(Buffer.from(chunk));
@@ -105,6 +225,18 @@ async function readRequestBody(request: import("node:http").IncomingMessage): Pr
 export function studioStyleLibraryPlugin(options: StudioStyleLibraryOptions): Plugin {
   const library = createStyleLibrary(options.root);
   const selectionPath = join(options.workspaceRoot, "HYPIT_STYLE_SELECTION.json");
+  const planPath = join(options.workspaceRoot, "HYPIT_STYLE_PLAN.json");
+  const writeAtomic = async (path: string, value: unknown): Promise<void> => {
+    const temporary = join(options.workspaceRoot, `.${path.split(/[\\/]/u).at(-1)}.${randomUUID()}.tmp`);
+    try {
+      await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+      await rename(temporary, path);
+    } finally {
+      await unlink(temporary).catch((error: NodeJS.ErrnoException) => {
+        if (error.code !== "ENOENT") throw error;
+      });
+    }
+  };
   const readSelection = async (): Promise<StyleSelectionDocument> => {
     try {
       return selectionDocument(JSON.parse(await readFile(selectionPath, "utf8")) as unknown);
@@ -116,15 +248,28 @@ export function studioStyleLibraryPlugin(options: StudioStyleLibraryOptions): Pl
     }
   };
   const writeSelection = async (document: StyleSelectionDocument): Promise<void> => {
-    const temporary = join(options.workspaceRoot, `.HYPIT_STYLE_SELECTION.${randomUUID()}.tmp`);
+    await writeAtomic(selectionPath, document);
+  };
+  const readPlan = async (): Promise<StylePlanDocument | undefined> => {
     try {
-      await writeFile(temporary, `${JSON.stringify(document, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
-      await rename(temporary, selectionPath);
-    } finally {
-      await unlink(temporary).catch((error: NodeJS.ErrnoException) => {
-        if (error.code !== "ENOENT") throw error;
-      });
+      return stylePlanDocument(JSON.parse(await readFile(planPath, "utf8")) as unknown);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+      throw error;
     }
+  };
+  const selectionEntries = async (ids: readonly string[]): Promise<readonly StyleSelectionEntry[]> => {
+    const entries = await library.list();
+    return ids.map((id) => {
+      const entry = entries.find((candidate) => candidate.id === id);
+      if (entry === undefined) throw new Error(`Style ${id} does not exist.`);
+      return {
+        id: entry.id,
+        name: entry.name,
+        version: entry.latestVersion,
+        preview: entry.preview,
+      } satisfies StyleSelectionEntry;
+    });
   };
   return {
     name: "hypit-studio-style-library",
@@ -157,17 +302,7 @@ export function studioStyleLibraryPlugin(options: StudioStyleLibraryOptions): Pl
                 return;
               }
               const ids = selectionIds(await readRequestBody(request));
-              const entries = await library.list();
-              const selected = ids.map((id) => {
-                const entry = entries.find((candidate) => candidate.id === id);
-                if (entry === undefined) throw new Error(`Style ${id} does not exist.`);
-                return {
-                  id: entry.id,
-                  name: entry.name,
-                  version: entry.latestVersion,
-                  preview: entry.preview,
-                } satisfies StyleSelectionEntry;
-              });
+              const selected = await selectionEntries(ids);
               const document: StyleSelectionDocument = {
                 format: "hypit.style-selection@1",
                 updatedAt: new Date().toISOString(),
@@ -175,6 +310,46 @@ export function studioStyleLibraryPlugin(options: StudioStyleLibraryOptions): Pl
               };
               await writeSelection(document);
               json(response, 200, document);
+            } catch (error) {
+              json(response, 400, { error: error instanceof Error ? error.message : String(error) });
+            }
+          })();
+          return;
+        }
+        if (url.pathname === "/__studio/style-library/plan") {
+          void readPlan().then(
+            (plan) => json(response, 200, plan ?? null),
+            (error) => json(response, 500, { error: error instanceof Error ? error.message : String(error) }),
+          );
+          return;
+        }
+        if (url.pathname === "/__studio/style-library/recommend") {
+          void (async () => {
+            try {
+              if (request.method !== "POST") {
+                response.statusCode = 405;
+                response.end();
+                return;
+              }
+              const input = recommendationRequest(await readRequestBody(request));
+              const entries = await library.list();
+              const plan = recommendStylePlan(entries, input.words, input.durationSec, {
+                ...(input.candidateIds === undefined ? {} : { candidateIds: input.candidateIds }),
+                ...(input.sourceRevision === undefined ? {} : { sourceRevision: input.sourceRevision }),
+                ...(input.sourcePath === undefined ? {} : { sourcePath: input.sourcePath }),
+              });
+              const usedIds = [...new Set(plan.windows.map((window) => window.styleId))];
+              const selected = await selectionEntries(usedIds);
+              const selection: StyleSelectionDocument = {
+                format: "hypit.style-selection@1",
+                updatedAt: new Date().toISOString(),
+                styles: selected,
+              };
+              await Promise.all([
+                writeAtomic(planPath, plan),
+                writeSelection(selection),
+              ]);
+              json(response, 200, { plan, selection });
             } catch (error) {
               json(response, 400, { error: error instanceof Error ? error.message : String(error) });
             }
