@@ -1,0 +1,44 @@
+{
+  "format": "hypit.video-retrospective@1",
+  "status": "draft",
+  "projectId": "dsc-5862-playbook-25s-v2",
+  "publication": {
+    "status": "not-published",
+    "platform": "",
+    "publishedAt": "",
+    "reasonIfNotPublished": "本版只用于对比自制素材的加入效果，未发布。"
+  },
+  "metrics": {
+    "24h": null,
+    "72h": null,
+    "7d": null
+  },
+  "retention": {
+    "curve": []
+  },
+  "comments": [],
+  "learnings": [
+    {
+      "id": "L-005",
+      "summary": "只把风格写进 reference.json 不构成风格应用。",
+      "evidence": "v2 与 v1 画面只差结尾一张卡片，用户判定已拆解风格没有利用起来。",
+      "action": "风格引用必须同时产出画面参数与关键帧证据。",
+      "target": "playbook reference 阶段门禁"
+    },
+    {
+      "id": "L-001",
+      "summary": "透明 WebM 直接合成会丢 alpha。",
+      "evidence": "v2 第一次合成输出纯黑背景，改用 PNG 序列后正常。",
+      "action": "透明层统一走 PNG 序列合成。",
+      "target": "component-library/hyperframes/alpha-webm-sticker"
+    }
+  ],
+  "libraryUpdates": [
+    {
+      "library": "component-library",
+      "id": "hyperframes/product-card",
+      "change": "新增 selection-card 用法，作为结尾对比信息卡的承载层。",
+      "status": "verified"
+    }
+  ]
+}

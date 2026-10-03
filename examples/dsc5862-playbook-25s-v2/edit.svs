@@ -1,0 +1,7 @@
+<?svml using="@hypit/svs@1"?>
+<sheet version="1">
+ film.main { background: #000000; }
+ media.shot-01 { stack-order: 0; fit: cover; playback: once-start; trim-start: 0; trim-end: 378; }
+ media.shot-02 { stack-order: 0; fit: cover; playback: once-start; trim-start: 378; trim-end: 618; }
+ media.shot-03 { stack-order: 0; fit: cover; playback: once-start; trim-start: 618; trim-end: 731; }
+</sheet>

@@ -2198,6 +2198,146 @@ button:focus-visible, textarea:focus-visible {
 .stage-review .stage-scrubber::-moz-range-track { height: 4px; border-radius: 2px; background: #565b64; }
 .stage-review .stage-scrubber::-moz-range-thumb { width: 12px; height: 12px; }
 .scrub-preview { position: absolute; bottom: calc(100% + 8px); padding: 3px; border: 1px solid #4b4f56; border-radius: 4px; background: #1b1d21; box-shadow: 0 4px 16px #0006; pointer-events: none; }
+
+/* Smart editing opens on a focused style picker instead of the full library catalogue. */
+.library-view[data-library-view="styles"] .sidebar-panel {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 36px minmax(0, 1fr);
+}
+.library-view[data-library-view="styles"] .sidebar-panel-nav { display: none; }
+.library-view[data-library-view="styles"] .sidebar-panel-content { grid-area: 2 / 1 / 3 / 2; }
+.smart-style-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: #0f1013;
+}
+.smart-style-page > .style-name-rail[hidden] { display: none; }
+.smart-style-page .style-effect-panel {
+  min-height: 100%;
+  padding: 16px 13px 24px;
+}
+.smart-style-intro { margin: 0 0 15px; }
+.smart-style-intro > span {
+  display: block;
+  color: #e3e5e9;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 18px;
+}
+.smart-style-intro p {
+  max-width: 330px;
+  margin: 5px 0 0;
+  color: #777e89;
+  font-size: 10px;
+  line-height: 15px;
+}
+.smart-style-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 13px 10px;
+}
+.smart-style-card {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d8dbe0;
+  text-align: center;
+}
+.smart-style-card:disabled { opacity: .55; }
+.smart-style-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid #30343c;
+  border-radius: 8px;
+  background: #181a1f;
+  box-shadow: 0 9px 20px rgba(0, 0, 0, .18);
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+.smart-style-card:hover .smart-style-thumb {
+  border-color: #59616d;
+  transform: translateY(-1px);
+}
+.smart-style-card[aria-pressed="true"] .smart-style-thumb {
+  border: 2px solid #55e5d1;
+  box-shadow: 0 0 0 1px rgba(85, 229, 209, .25), 0 10px 24px rgba(0, 0, 0, .28);
+}
+.smart-style-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.smart-style-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 58%, rgba(5, 7, 10, .45));
+  pointer-events: none;
+}
+.smart-style-check {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 7px;
+  width: 21px;
+  height: 21px;
+  display: none;
+  place-items: center;
+  border-radius: 50%;
+  background: #55e5d1;
+  color: #08231f;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, .3);
+}
+.smart-style-check .icon { width: 13px; height: 13px; stroke-width: 2.2; }
+.smart-style-card[aria-pressed="true"] .smart-style-check { display: grid; }
+.smart-style-label {
+  display: block;
+  margin-top: 8px;
+  color: #e0e2e6;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.smart-style-card small {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: 2px;
+  color: #747b86;
+  font-size: 8px;
+  line-height: 12px;
+}
+.smart-style-footer {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 11px;
+  border-top: 1px solid #24272d;
+}
+.smart-style-state { color: #55e5d1; font-size: 9px; }
+.smart-style-clear {
+  padding: 4px 7px;
+  border: 1px solid #343840;
+  border-radius: 4px;
+  background: #191b20;
+  color: #9299a4;
+  font-size: 8px;
+}
+.smart-style-clear:disabled { opacity: .35; }
 .scrub-preview-picture { position: relative; display: grid; place-items: center; overflow: hidden; background: #111215; }
 .scrub-preview-picture iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: top left; pointer-events: none; }
 .scrub-preview-picture span { padding: 8px; color: var(--text-3); font: 10px var(--font-ui); text-align: center; }

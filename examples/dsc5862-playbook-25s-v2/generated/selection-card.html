@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Selection Card</title>
+  <style>
+    @font-face {
+      font-family: "DengXian";
+      src: url("../overlay/assets/Chinese-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-display: block;
+    }
+
+    @font-face {
+      font-family: "DengXianBold";
+      src: url("../overlay/assets/Chinese-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-display: block;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 620px;
+      height: 470px;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    #card {
+      position: relative;
+      width: 620px;
+      height: 470px;
+      padding: 28px 30px 26px;
+      border: 1px solid rgba(182, 122, 47, 0.48);
+      border-radius: 8px;
+      background: rgba(255, 244, 221, 0.94);
+      box-shadow: 0 16px 42px rgba(63, 40, 18, 0.16);
+      color: #2a211a;
+      font-family: "DengXian", sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .accent-line {
+      width: 86px;
+      height: 4px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+      background: #b67a2f;
+    }
+
+    .kicker {
+      margin-bottom: 6px;
+      color: #785b3f;
+      font-size: 21px;
+      line-height: 1;
+    }
+
+    .title {
+      margin: 0 0 18px;
+      font-family: "DengXianBold", sans-serif;
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .row {
+      padding: 16px 0 15px;
+      border-top: 1px solid rgba(182, 122, 47, 0.26);
+    }
+
+    .row-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      flex: none;
+      border-radius: 50%;
+    }
+
+    .dot.red {
+      background: #c94a3f;
+    }
+
+    .dot.slate {
+      background: #556a78;
+    }
+
+    .row-index {
+      color: #b67a2f;
+      font-family: "DengXianBold", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .row-name {
+      font-family: "DengXianBold", sans-serif;
+      font-size: 29px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .notes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 5px 13px 6px;
+      border: 1px solid rgba(182, 122, 47, 0.32);
+      border-radius: 6px;
+      background: rgba(244, 225, 188, 0.78);
+      color: #5a3b20;
+      font-size: 20px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .usage {
+      padding-left: 13px;
+      border-left: 4px solid #b67a2f;
+      color: #4d4034;
+      font-size: 22px;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="card">
+    <div class="accent-line"></div>
+    <div class="kicker">两支香气对比</div>
+    <div class="title">怎么选</div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="dot red"></span>
+        <span class="row-index">01</span>
+        <span class="row-name">阿玛尼红雀</span>
+      </div>
+      <div class="notes">
+        <span class="chip">黑加仑</span>
+        <span class="chip">柠檬</span>
+        <span class="chip">玫瑰</span>
+        <span class="chip">茉莉</span>
+      </div>
+      <div class="usage">香草木质 · 聚会约会</div>
+    </div>
+
+    <div class="row">
+      <div class="row-head">
+        <span class="dot slate"></span>
+        <span class="row-index">02</span>
+        <span class="row-name">TF 珍华乌木</span>
+      </div>
+      <div class="notes">
+        <span class="chip">乌木</span>
+        <span class="chip">檀香</span>
+        <span class="chip">琥珀</span>
+      </div>
+      <div class="usage">沉静木质 · 秋冬正式</div>
+    </div>
+  </div>
+</body>
+</html>

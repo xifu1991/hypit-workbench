@@ -1,0 +1,105 @@
+{
+  "format": "hypit.video-reference@1",
+  "status": "approved",
+  "projectId": "dsc-5862-playbook-25s",
+  "briefPath": "brief.json",
+  "sources": [
+    {
+      "label": "user-playbook-standard",
+      "path": "",
+      "url": "",
+      "sha256": "6CACF6FCBD5F4BE6B49AF1BEC1D19E19DEAC66F090BA63DA1641970BA8D0441D",
+      "timeRange": {
+        "startSeconds": 0,
+        "endSeconds": 91.391
+      },
+      "role": "process-standard",
+      "notes": "本项目的参考对象是用户给出的 Playbook 八步标准，不是第三方视频。该 SHA-256 记录的是本片唯一素材 DSC_5862.MP4，用于锁定素材版本。"
+    },
+    {
+      "label": "style-library/product-hero-speaker-pip",
+      "path": "style-library/product-hero-speaker-pip/0001/analysis/style.json",
+      "url": "",
+      "sha256": "",
+      "timeRange": {
+        "startSeconds": 0,
+        "endSeconds": 0
+      },
+      "role": "structure-reference",
+      "notes": "本地已拆解风格库条目，用于确认产品特写加主播出镜的结构。v2 沿用其小面积信息层思路，不复制其品牌、文案与素材。"
+    }
+  ],
+  "selectedStyleIds": [],
+  "structure": {
+    "narrativePattern": "三段式产品讲解：第一支香调与场合、第二支香调与场合、结尾试香方法收口。",
+    "hook": {
+      "timeSeconds": 0.12,
+      "mechanism": "开场即用左上信息卡点出第一支产品，让观众知道这段在看什么。",
+      "onScreenText": "01 阿玛尼红雀 / 红色香水"
+    },
+    "pacing": {
+      "shotCount": 3,
+      "averageShotSeconds": 8.37,
+      "firstCutSeconds": 12.6
+    },
+    "informationDensity": "每个视觉状态只承担一个主信息：第一支香调与场合、第二支香调与场合、结尾试香建议。",
+    "shotLanguage": [
+      "第一段全屏人物持瓶，左上信息卡说明香调与场合",
+      "第二段全屏人物持瓶，左上信息卡替换为第二支产品",
+      "第三段桌面多瓶同框，底部深色提示条收口"
+    ],
+    "captionSystem": [
+      "暖米白信息卡配深咖标题",
+      "香调关键词用小圆角标签",
+      "结尾用深色窄条承载结论"
+    ],
+    "transitions": [
+      "两段信息卡在 12.6 秒完成替换",
+      "结尾提示在 20.6 秒进入",
+      "v2 在两支对比卡于 21.90 秒进入，与底部提示条分层共存",
+      "没有叠化、闪白或装饰转场"
+    ],
+    "ending": "用桌面多瓶同框加一句试香方法收口，不回到纯人脸。"
+  },
+  "evidenceFrames": [
+    {
+      "timeSeconds": 0.6,
+      "path": "qa/final_frames/t0.6.jpg",
+      "observation": "第一支产品信息卡进入，人物持瓶位于画面右侧。"
+    },
+    {
+      "timeSeconds": 13,
+      "path": "qa/final_frames/t13.jpg",
+      "observation": "信息卡切换到第二支产品，深色瓶身完整可见。"
+    },
+    {
+      "timeSeconds": 16.8,
+      "path": "qa/final_frames/t16.8.jpg",
+      "observation": "第二支产品的香调与场合信息稳定显示。"
+    },
+    {
+      "timeSeconds": 23.6,
+      "path": "qa/final_frames/t23.6.jpg",
+      "observation": "结尾提示与桌面多瓶同框，产品成为画面主角。"
+    }
+  ],
+  "reusablePatterns": [
+    "左上信息卡承担产品名、香调和场合",
+    "信息卡只在段落切换时整体替换",
+    "结尾用桌面多瓶同框收口"
+  ],
+  "forbiddenReuse": [
+    {
+      "type": "brand",
+      "detail": "不引入任何第三方参考视频的品牌、人物、口播或字幕。"
+    },
+    {
+      "type": "motion",
+      "detail": "不使用连续放大、逐字动画、闪白或装饰贴纸。"
+    }
+  ],
+  "originality": {
+    "mode": "playbook-structured",
+    "declaration": "参考对象是用户给出的 Playbook 流程标准，不是某条第三方视频。画面、产品信息和新字幕均来自 DSC_5862.MP4 与用户指定背景图。"
+  }
+}

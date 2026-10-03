@@ -49,7 +49,7 @@ app.innerHTML = `
       </button>
       <div data-language-menu></div>
       <div class="view-tabs" role="tablist" ${uiAttribute("aria-label", "app.studio-view")}>
-        <button type="button" role="tab" data-view="studio" aria-selected="true">${icon("studio")}${uiLabel("app.studio")}</button>
+        <button type="button" role="tab" data-view="studio" aria-selected="true">${icon("wand")}${uiLabel("app.studio")}</button>
         <button type="button" role="tab" data-view="comments" aria-selected="false">${icon("comments")}${uiLabel("app.comments")}</button>
       </div>
     </div>

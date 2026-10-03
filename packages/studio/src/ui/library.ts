@@ -264,23 +264,23 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   element.className = "library";
   element.innerHTML = `
     <div class="library-tabs" role="tablist" ${uiAttribute("aria-label", "library.studio-library")}>
-      <button type="button" class="library-tab active" data-library-tab="source" role="tab" aria-selected="true">
+      <button type="button" class="library-tab" data-library-tab="source" role="tab" aria-selected="false">
         <span>${icon("code")}</span><strong>${uiLabel("library.source")}</strong>
       </button>
       <button type="button" class="library-tab" data-library-tab="tasks" role="tab" aria-selected="false">
         <span>${icon("tasks")}</span><strong>${uiLabel("library.tasks")}</strong>
       </button>
-      <button type="button" class="library-tab" data-library-tab="styles" role="tab" aria-selected="false">
-        <span>${icon("layers")}</span><strong>${uiLabel("library.styles")}</strong>
+      <button type="button" class="library-tab active" data-library-tab="styles" role="tab" aria-selected="true">
+        <span>${icon("wand")}</span><strong>${uiLabel("library.styles")}</strong>
       </button>
       <button type="button" class="library-tab" data-library-tab="artifacts" role="tab" aria-selected="false">
         <span>${icon("results")}</span><strong>${uiLabel("library.artifacts")}</strong>
       </button>
     </div>
-    <section class="library-view active" data-library-view="source">
+    <section class="library-view" data-library-view="source">
     </section>
     <section class="library-view" data-library-view="tasks"></section>
-    <section class="library-view" data-library-view="styles"></section>
+    <section class="library-view active" data-library-view="styles"></section>
     <section class="library-view" data-library-view="artifacts">
     </section>`;
 
@@ -312,7 +312,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   const artifactFilters = mediaPanel.navigation;
   let snapshot: StudioSnapshot | undefined;
   let selectedSource = "";
-  let active: LibrarySection = "source";
+  let active: LibrarySection = "styles";
   const libraries: Partial<Record<"tasks" | "artifacts", StudioLibraryView>> = {};
   let taskFilter: "all" | "ongoing" | "finished" = "all";
   let artifactFilter: ArtifactFilter = "all";
@@ -609,6 +609,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
       else if (active === "tasks" || active === "artifacts") void refresh(active);
     });
   }
+  stylesPane.activate();
 
   return {
     element,

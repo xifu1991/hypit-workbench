@@ -1,0 +1,200 @@
+{
+  "format": "hypit.shotbook@1",
+  "status": "approved",
+  "projectId": "dsc-5862-playbook-25s",
+  "briefPath": "brief.json",
+  "referencePath": "reference.json",
+  "materialPlanPath": "material-plan.json",
+  "timelineSemantics": "[startFrame,endFrame)",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "16:9"
+  },
+  "fps": 30,
+  "totalFrames": 731,
+  "shots": [
+    {
+      "id": "shot-01",
+      "order": 1,
+      "startFrame": 0,
+      "endFrame": 378,
+      "purpose": "先讲清第一支香水的香调与适用场合，让观众一眼知道在看什么。",
+      "referenceMapping": {
+        "startSeconds": 0,
+        "endSeconds": 12.6,
+        "reuse": "左上信息卡 + 全屏人物持瓶"
+      },
+      "narration": "接着闻阿玛尼红雀，黑加仑、柠檬开场，玫瑰和茉莉更饱满。香草木质，把甜味拖住，聚会约会都接得住。",
+      "visual": {
+        "assetIds": [
+          "source-full",
+          "background-plate"
+        ],
+        "description": "人物位于画面右侧手持红色香水，左上暖米白信息卡说明产品名、香调与场合。",
+        "subjectFocus": "红色香水瓶与主播持瓶手势",
+        "framing": "全屏人物持瓶，产品位于中右侧",
+        "crop": "fit=cover"
+      },
+      "captions": [
+        "01 · 阿玛尼红雀",
+        "红色香水",
+        "黑加仑 / 柠檬 / 玫瑰 / 茉莉",
+        "香草木质 · 聚会约会"
+      ],
+      "layout": "full-frame-presenter-with-top-left-product-card",
+      "components": [
+        {
+          "slot": "product-card",
+          "componentId": "hyperframes/product-card",
+          "version": "1",
+          "purpose": "标注第一支产品的香调与场合"
+        },
+        {
+          "slot": "progress-rule",
+          "componentId": "hyperframes/progress-rule",
+          "version": "1",
+          "purpose": "提示全片进度"
+        }
+      ],
+      "motion": [
+        "信息卡在 0.12 秒从下方滑入",
+        "强调线、产品名、香调标签依次进入",
+        "12.32 秒整体上移淡出"
+      ],
+      "audio": {
+        "mode": "original",
+        "notes": "0 至 12.6 秒原人声连续保留；其中源素材 4.000-4.720 秒的半句重录已删除。"
+      },
+      "acceptanceCriteria": [
+        "信息卡不遮主播脸部",
+        "信息卡不遮手持瓶身",
+        "第一支产品名、香调、场合三者齐全",
+        "底部字幕不遮挡瓶身与手势"
+      ]
+    },
+    {
+      "id": "shot-02",
+      "order": 2,
+      "startFrame": 378,
+      "endFrame": 618,
+      "purpose": "用同一版式切换第二支产品，降低信息跳变，突出深色香水的香调与场合。",
+      "referenceMapping": {
+        "startSeconds": 12.6,
+        "endSeconds": 20.6,
+        "reuse": "左上信息卡整体替换 + 全屏人物持瓶"
+      },
+      "narration": "继续是 TF 珍华乌木，乌木、檀香，还有琥珀，整体沉静，秋冬和正式场合可以重点试闻。",
+      "visual": {
+        "assetIds": [
+          "source-full",
+          "background-plate"
+        ],
+        "description": "人物位于画面中部手持深色香水，左上信息卡替换为第二支产品。",
+        "subjectFocus": "深色香水瓶与主播持瓶手势",
+        "framing": "全屏人物持瓶，产品位于画面中部",
+        "crop": "fit=cover"
+      },
+      "captions": [
+        "02 · TF 珍华乌木",
+        "深色香水",
+        "乌木 / 檀香 / 琥珀",
+        "秋冬 · 正式场合"
+      ],
+      "layout": "full-frame-presenter-with-top-left-product-card",
+      "components": [
+        {
+          "slot": "product-card",
+          "componentId": "hyperframes/product-card",
+          "version": "1",
+          "purpose": "标注第二支产品的香调与场合"
+        },
+        {
+          "slot": "progress-rule",
+          "componentId": "hyperframes/progress-rule",
+          "version": "1",
+          "purpose": "提示全片进度"
+        }
+      ],
+      "motion": [
+        "第二张信息卡在 12.50 秒进入",
+        "香调标签错开 0.07 秒进入",
+        "20.02 秒整体上移淡出"
+      ],
+      "audio": {
+        "mode": "original",
+        "notes": "12.6 至 20.6 秒原人声连续保留。"
+      },
+      "acceptanceCriteria": [
+        "第二张卡不与第一张卡同时可见",
+        "信息卡不遮深色瓶身",
+        "香调与场合与口播一致"
+      ]
+    },
+    {
+      "id": "shot-03",
+      "order": 3,
+      "startFrame": 618,
+      "endFrame": 731,
+      "purpose": "用桌面多瓶同框画面收口，把结论落在试香方法上，避免结尾回到纯人脸。",
+      "referenceMapping": {
+        "startSeconds": 20.6,
+        "endSeconds": 24.37,
+        "reuse": "桌面多瓶同框 + 底部深色提示条"
+      },
+      "narration": "同一轮试闻，别挨太近，给每一支一点时间，再判断。",
+      "visual": {
+        "assetIds": [
+          "closing-shot",
+          "background-plate"
+        ],
+        "description": "画面同时出现多支香水，底部深色提示条承载试香结论。",
+        "subjectFocus": "桌面排列的多支香水",
+        "framing": "桌面多瓶同框",
+        "crop": "fit=cover"
+      },
+      "captions": [
+        "试香方法",
+        "给每一支一点时间，再判断"
+      ],
+      "layout": "desktop-multi-bottle-with-bottom-note",
+      "components": [
+        {
+          "slot": "end-note",
+          "componentId": "hyperframes/end-note",
+          "version": "1",
+          "purpose": "用一句话收口"
+        },
+        {
+          "slot": "selection-card",
+          "componentId": "hyperframes/product-card",
+          "version": "1",
+          "assetId": "selection-card",
+          "purpose": "用自制对比图总结两支香水的香调与场合差异"
+        },
+        {
+          "slot": "progress-rule",
+          "componentId": "hyperframes/progress-rule",
+          "version": "1",
+          "purpose": "提示全片进度"
+        }
+      ],
+      "motion": [
+        "结尾提示在 20.30 秒滑入",
+        "提示条、眉题、结论依次出现",
+        "自制对比卡在 21.90 秒从下方滑入左上安全区，24.10 秒淡出",
+        "24.36 秒开始淡出，最后一帧前收束"
+      ],
+      "audio": {
+        "mode": "original",
+        "notes": "20.6 秒至结尾原人声完整收尾。"
+      },
+      "acceptanceCriteria": [
+        "结尾主画面是产品不是纯脸",
+        "提示条不遮住瓶身主体",
+        "自制对比卡不进入人脸和瓶身区域，且与底部提示条不重叠",
+        "成片在 24.367 秒结束"
+      ]
+    }
+  ]
+}

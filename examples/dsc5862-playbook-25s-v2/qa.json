@@ -1,0 +1,53 @@
+{
+  "format": "hypit.video-qa@1",
+  "status": "pass",
+  "projectId": "dsc-5862-playbook-25s-v2",
+  "artifact": "DSC_5862_playbook_25s_v2_final.mp4",
+  "sha256": "6F8E12C7D4D66CCFBC6BED13670F3742D1CFB73405A78BC5408FE9E1EB8CF5E4",
+  "checks": [
+    {
+      "id": "media-integrity",
+      "status": "pass",
+      "evidence": "24.368 秒、1920x1080、30fps、731 帧、H.264/AAC、14,097,107 字节、平均 4.63 Mbps。"
+    },
+    {
+      "id": "audio-continuity",
+      "status": "pass",
+      "evidence": "音频直接复制自 base-24s-cut.mp4，未二次编码。"
+    },
+    {
+      "id": "v1-opener-parity",
+      "status": "pass",
+      "evidence": "0.6 秒关键帧与 v1 一致，开场信息卡、字幕和构图未改动。"
+    },
+    {
+      "id": "generated-asset-present",
+      "status": "pass",
+      "evidence": "21.90-24.10 秒可见 generated/selection-card.png 的自制对比卡，关键帧 qa/chk-22.4.jpg、qa/chk-23.6.jpg。"
+    },
+    {
+      "id": "no-occlusion",
+      "status": "pass",
+      "evidence": "对比卡位于左上 72,62 起 620x470，未进入人脸与瓶身区域，与底部提示条垂直不重叠。"
+    },
+    {
+      "id": "reference-structure",
+      "status": "pass",
+      "evidence": "三段切点为 0-378、378-618、618-731 帧，与 shotbook 一致，已修正 v1 文档中的旧帧码。"
+    },
+    {
+      "id": "caption-sync",
+      "status": "pass",
+      "evidence": "12 条字幕沿用 v1 的豆包词级时间轴，覆盖 0.08-18.28 秒，未改动。"
+    }
+  ],
+  "artifacts": [
+    "qa/compare-22.4.jpg",
+    "qa/compare-23.6.jpg",
+    "qa/chk-22.4.jpg",
+    "qa/frames/frame_00660.png"
+  ],
+  "knownIssues": [
+    "对比卡会覆盖画面左侧部分书架背景，属于设计取舍，不遮挡人物与产品。"
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "format": "hypit.component-plan@1",
+  "status": "approved",
+  "projectId": "dsc-5862-playbook-25s",
+  "shotbookPath": "shotbook.json",
+  "components": [
+    {
+      "id": "use-01",
+      "shotId": "shot-01",
+      "slot": "product-card",
+      "componentId": "hyperframes/product-card",
+      "version": "1",
+      "requiredStatus": "verified",
+      "overrides": {
+        "placement": "top-left",
+        "palette": "cream-espresso-gold",
+        "accent": "armani-red"
+      },
+      "assetReplacements": [],
+      "license": {
+        "status": "project-owned",
+        "evidence": "本地 HyperFrames HTML/CSS/GSAP 实现，字体为项目内置字体文件。"
+      },
+      "evidence": "已进入 DSC_5862_playbook_25s_final.mp4 的 0.12-12.32 秒，关键帧 t0.6、t2.9 可见。"
+    },
+    {
+      "id": "use-02",
+      "shotId": "shot-02",
+      "slot": "product-card",
+      "componentId": "hyperframes/product-card",
+      "version": "1",
+      "requiredStatus": "verified",
+      "overrides": {
+        "placement": "top-left",
+        "palette": "cream-espresso-gold",
+        "accent": "slate"
+      },
+      "assetReplacements": [],
+      "license": {
+        "status": "project-owned",
+        "evidence": "本地 HyperFrames HTML/CSS/GSAP 实现，字体为项目内置字体文件。"
+      },
+      "evidence": "已进入成片的 12.50-20.02 秒，关键帧 t13.0、t16.8 可见。"
+    },
+    {
+      "id": "use-03",
+      "shotId": "shot-03",
+      "slot": "end-note",
+      "componentId": "hyperframes/end-note",
+      "version": "1",
+      "requiredStatus": "verified",
+      "overrides": {
+        "placement": "bottom-center",
+        "palette": "dark-espresso"
+      },
+      "assetReplacements": [],
+      "license": {
+        "status": "project-owned",
+        "evidence": "本地 HyperFrames HTML/CSS/GSAP 实现，字体为项目内置字体文件。"
+      },
+      "evidence": "已进入成片的 20.30-24.36 秒，关键帧 t20.6、t23.6 可见。"
+    },
+    {
+      "id": "use-05",
+      "shotId": "shot-01",
+      "slot": "caption",
+      "componentId": "hyperframes/caption-band",
+      "version": "1",
+      "requiredStatus": "verified",
+      "overrides": {
+        "placement": "bottom-center",
+        "safeZone": "bottom",
+        "palette": "dark-espresso-gold",
+        "source": "volc-seedasr-2.0 word timings"
+      },
+      "assetReplacements": [],
+      "license": {
+        "status": "project-owned",
+        "evidence": "本地 HyperFrames HTML/CSS/GSAP 实现，字体为项目内置字体文件。"
+      },
+      "evidence": "12 条字幕已进入成片 0.08-18.28 秒，关键帧 t2.9、t5.8、t7.9、t13.0、t16.8 可见。"
+    },
+    {
+      "id": "use-04",
+      "shotId": "shot-01",
+      "slot": "progress-rule",
+      "componentId": "hyperframes/progress-rule",
+      "version": "1",
+      "requiredStatus": "verified",
+      "overrides": {
+        "duration": "25.0s",
+        "easing": "none"
+      },
+      "assetReplacements": [],
+      "license": {
+        "status": "project-owned",
+        "evidence": "本地 HyperFrames HTML/CSS/GSAP 实现。"
+      },
+      "evidence": "进度线在 0.1 秒至 24.27 秒之间匀速推进。"
+    },
+    {
+      "id": "use-06",
+      "shotId": "shot-03",
+      "slot": "selection-card",
+      "componentId": "hyperframes/product-card",
+      "version": "1",
+      "requiredStatus": "verified",
+      "overrides": {
+        "placement": "top-left",
+        "palette": "cream-espresso-gold",
+        "source": "generated/selection-card.png"
+      },
+      "assetReplacements": [
+        {
+          "slot": "card-image",
+          "assetId": "selection-card",
+          "path": "generated/selection-card.png"
+        }
+      ],
+      "license": {
+        "status": "project-owned",
+        "evidence": "自制版式经本地 Chrome 无头渲染导出，文案取自本片口播与 shotbook。"
+      },
+      "evidence": "已进入 v2 成片的 21.90-24.10 秒，关键帧 qa/chk-22.4.jpg 可见。"
+    }
+  ]
+}

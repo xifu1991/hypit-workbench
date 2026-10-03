@@ -1,0 +1,148 @@
+{
+  "format": "hypit.material-plan@1",
+  "status": "approved",
+  "projectId": "dsc-5862-playbook-25s",
+  "briefPath": "brief.json",
+  "referencePath": "reference.json",
+  "arguments": [
+    {
+      "id": "claim-01",
+      "claim": "25 秒成片需要连续保留 DSC_5862.MP4 的原始人声音轨和人物素材。",
+      "role": "spoken-through-line",
+      "assets": [
+        {
+          "id": "source-full",
+          "path": "assets/source-full.mp4",
+          "mediaType": "video",
+          "source": "用户提供的 D:/BaiduNetdiskDownload/DSC_5862.MP4",
+          "license": {
+            "status": "user-supplied",
+            "evidence": "用户提供的本地项目素材，仅用于本次剪辑。"
+          },
+          "availability": "ready",
+          "evidence": "91.391 秒、1920x1080、约 59.94fps、含 AAC 音轨；成片使用 50.800-86.920 秒区间。"
+        }
+      ],
+      "coverage": "complete",
+      "gap": ""
+    },
+    {
+      "id": "claim-02",
+      "claim": "原始素材是绿幕拍摄，需要替换为用户指定的室内背景图并保持人物质感。",
+      "role": "background-replacement",
+      "assets": [
+        {
+          "id": "background-plate",
+          "path": "assets/background.jpg",
+          "mediaType": "image",
+          "source": "用户提供的指定背景图",
+          "license": {
+            "status": "user-supplied",
+            "evidence": "用户明确指定用于本支视频的背景替换。"
+          },
+          "availability": "ready",
+          "evidence": "已用于 DSC_5862_background_25s_complete.mp4 的底片合成。"
+        }
+      ],
+      "coverage": "complete",
+      "gap": ""
+    },
+    {
+      "id": "claim-03",
+      "claim": "第一支与第二支香水需要分别标注香调和适用场合。",
+      "role": "product-evidence",
+      "assets": [
+        {
+          "id": "product-one",
+          "path": "assets/source-full.mp4#t=50.800,64.392",
+          "mediaType": "video",
+          "source": "DSC_5862.MP4 第一支产品段落",
+          "license": {
+            "status": "user-supplied",
+            "evidence": "用户提供的本地项目素材派生区间。"
+          },
+          "availability": "ready",
+          "evidence": "画面中可见阿玛尼红雀红色瓶身。"
+        },
+        {
+          "id": "product-two",
+          "path": "assets/source-full.mp4#t=69.050,77.021",
+          "mediaType": "video",
+          "source": "DSC_5862.MP4 第二支产品段落",
+          "license": {
+            "status": "user-supplied",
+            "evidence": "用户提供的本地项目素材派生区间。"
+          },
+          "availability": "ready",
+          "evidence": "画面中可见 TF 珍华乌木深色瓶身。"
+        }
+      ],
+      "coverage": "complete",
+      "gap": ""
+    },
+    {
+      "id": "claim-04",
+      "claim": "结尾需要用桌面多瓶同框画面说明试香方法。",
+      "role": "closing",
+      "assets": [
+        {
+          "id": "closing-shot",
+          "path": "assets/source-full.mp4#t=83.335,86.920",
+          "mediaType": "video",
+          "source": "DSC_5862.MP4 结尾段落",
+          "license": {
+            "status": "user-supplied",
+            "evidence": "用户提供的本地项目素材派生区间。"
+          },
+          "availability": "ready",
+          "evidence": "桌面同时出现多支香水。"
+        }
+      ],
+      "coverage": "complete",
+      "gap": ""
+    },
+    {
+      "id": "claim-05",
+      "claim": "字幕需要与口播逐句对齐，并在删除 4.000-4.720 秒重录后保持时间一致。",
+      "role": "caption-timing",
+      "assets": [
+        {
+          "id": "doubao-word-timings",
+          "path": "qa/asr/transcript.json",
+          "mediaType": "json",
+          "source": "豆包录音文件识别 2.0（volc.seedasr.auc）对 qa/asr/voice-16k.wav 的词级识别结果",
+          "license": {
+            "status": "user-account",
+            "evidence": "使用用户自己的火山引擎账号与 TOS 私有桶，识别完成后临时对象已删除。"
+          },
+          "availability": "ready",
+          "evidence": "25.088 秒音频返回 5 段 utterance 与逐字时间戳，原始响应保存在 qa/asr/doubao-raw.json。"
+        }
+      ],
+      "coverage": "complete",
+      "gap": ""
+    },
+    {
+      "id": "claim-06",
+      "claim": "v2 需要一张把两支香水香调与场合并排总结的对比素材，本地没有现成图片。",
+      "role": "summary-comparison",
+      "assets": [
+        {
+          "id": "selection-card",
+          "path": "generated/selection-card.png",
+          "mediaType": "image",
+          "source": "本项目自制：generated/selection-card.html 经本地 Chrome 无头渲染导出",
+          "license": {
+            "status": "project-owned",
+            "evidence": "版式、配色与文案均为本项目原创，文案取自本片口播与 shotbook，未引入第三方图片。"
+          },
+          "availability": "ready",
+          "sha256": "BF990EA9B72B874484A296FD989978861B6501D42A63C68103468621237C701D",
+          "evidence": "1240x940 RGBA PNG，98,841 字节；已作为 v2 overlay 图层在 21.90-24.10 秒进入成片。"
+        }
+      ],
+      "coverage": "complete",
+      "gap": ""
+    }
+  ]
+}

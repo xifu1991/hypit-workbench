@@ -1,0 +1,41 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="pipeline" from="@hypit/media-pipeline@1"/>
+  <import as="picture" from="@hypit/media-track@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="space" from="@hypit/spatial@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./edit.svs"/>
+
+  <media:Video id="finalVideo" src="./assets/DSC_5862_playbook_25s_v2_final.mp4"/>
+
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="731f"/>
+
+  <space:Canvas id="canvas" width="1920" height="1080"/>
+  <space:Frame id="full" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+
+  <pipeline:Normalize id="prepared" source={finalVideo} video="primary-moving" audio="default" span-authority="video" clock={clock}/>
+
+  <picture:Track id="picture" timeline={edit.timeline} canvas={canvas}>
+    <picture:Item id="shot-01-product-one" media={prepared.media} frame={full} start="0f" end="378f" appearance={look.media.shot-01}/>
+    <picture:Item id="shot-02-product-two" media={prepared.media} frame={full} start="378f" end="618f" appearance={look.media.shot-02}/>
+    <picture:Item id="shot-03-closing" media={prepared.media} frame={full} start="618f" end="731f" appearance={look.media.shot-03}/>
+  </picture:Track>
+
+  <audio:Track id="voice" timeline={edit.timeline}>
+    <audio:Item id="voice-01" source={prepared.media} start="0f" end="378f" trim-start="0f" trim-end="378f" playback="once" gain="1"/>
+    <audio:Item id="voice-02" source={prepared.media} start="378f" end="618f" trim-start="378f" trim-end="618f" playback="once" gain="1"/>
+    <audio:Item id="voice-03" source={prepared.media} start="618f" end="731f" trim-start="618f" trim-end="731f" playback="once" gain="1"/>
+  </audio:Track>
+
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={picture.visual}/>
+    <film:Track source={voice.audio}/>
+  </film:Film>
+
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

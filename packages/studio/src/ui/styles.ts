@@ -77,6 +77,8 @@ const categories: readonly CategoryDefinition[] = [
   { id: "editorial", label: "library.style-category-editorial" },
 ];
 
+const featuredStyleId = "armani-yulong-clean-talk";
+
 const knownCategories: Readonly<Record<string, Exclude<StyleCategory, "all">>> = {
   "armani-yulong-clean-talk": "presenter",
   "full-frame-presenter": "presenter",
@@ -124,9 +126,9 @@ export function createStylesPane(): StylesPane {
   panel.toolbar.innerHTML = `<span class="code-location" data-style-heading>${uiLabel("library.style-library-title")}</span>
     <button type="button" class="library-refresh" data-style-refresh ${uiAttribute("aria-label", "library.refresh-styles")} ${uiAttribute("title", "common.refresh")}>${icon("refresh")}</button>`;
   panel.content.innerHTML = `<div class="media-status" data-style-status role="status" hidden></div>
-    <div class="style-catalog">
+    <div class="smart-style-page">
       <section class="style-effect-panel" data-style-detail></section>
-      <aside class="style-name-rail" data-style-name-rail></aside>
+      <aside class="style-name-rail" data-style-name-rail hidden></aside>
     </div>`;
   const heading = panel.toolbar.querySelector<HTMLElement>("[data-style-heading]")!;
   const status = panel.content.querySelector<HTMLElement>("[data-style-status]")!;
@@ -147,9 +149,13 @@ export function createStylesPane(): StylesPane {
     status.textContent = message ?? "";
   };
 
-  const visibleEntries = (): readonly StyleEntry[] => category === "all"
-    ? entries
-    : entries.filter((entry) => categoryOf(entry) === category);
+  const visibleEntries = (): readonly StyleEntry[] => {
+    const featured = entries.filter((entry) => entry.id === featuredStyleId);
+    if (featured.length > 0) return featured;
+    return category === "all"
+      ? entries.slice(0, 1)
+      : entries.filter((entry) => categoryOf(entry) === category).slice(0, 1);
+  };
 
   const renderEmptyDetail = (): void => {
     detailNode.innerHTML = `<div class="library-empty"><span class="library-empty-icon">${icon("layers")}</span><strong></strong><p></p></div>`;
@@ -164,69 +170,48 @@ export function createStylesPane(): StylesPane {
     }
     const currentDetail = detail;
     const urls = previewUrls(currentDetail);
-    const effectCards = urls.map((url, index) => {
-      const card = document.createElement("a");
-      card.className = "style-effect-card";
-      card.href = url;
-      card.target = "_blank";
-      card.rel = "noreferrer";
-      card.innerHTML = `<img alt=""><span>${String(index + 1).padStart(2, "0")}</span>`;
-      const image = card.querySelector<HTMLImageElement>("img")!;
-      image.src = url;
-      image.alt = `${currentDetail.entry.name} ${index + 1}`;
-      image.loading = "lazy";
-      return card;
-    });
-
+    const applied = selectedStyleIds.has(currentDetail.entry.id);
     detailNode.innerHTML = `
-      <header class="style-effect-heading">
-        <div class="style-effect-title">
-          <span>${uiLabel("library.style-selected-label")}</span>
-          <h3></h3>
-        </div>
-        <label class="style-effect-picker">
-          <input type="checkbox">
-          <span>${uiLabel("library.style-selection-use")}</span>
-        </label>
+      <header class="smart-style-intro">
+        <span>${uiLabel("library.smart-style-choose")}</span>
+        <p>${uiLabel("library.smart-style-description")}</p>
       </header>
-      <p class="style-selected-summary"></p>
-      <div class="style-effect-grid"></div>
-      <footer class="style-effect-footer">
-        <div class="style-effect-count"></div>
-        <div class="style-selected-tags"></div>
-        <div class="style-links">
-          <a data-source>${uiLabel("library.style-reference")}</a>
-          <a data-transcript>${uiLabel("library.style-transcript")}</a>
-        </div>
+      <div class="smart-style-grid">
+        <button type="button" class="smart-style-card" aria-pressed="${String(applied)}">
+          <span class="smart-style-thumb">
+            <img alt="">
+            <span class="smart-style-check">${icon("check")}</span>
+          </span>
+          <span class="smart-style-label">${uiLabel("library.smart-style-product")}</span>
+          <small>${uiLabel("library.smart-style-product-detail")}</small>
+        </button>
+      </div>
+      <footer class="smart-style-footer">
+        <span class="smart-style-state">${applied ? uiLabel("library.smart-style-applied") : uiLabel("library.style-selection-none")}</span>
+        <button type="button" class="smart-style-clear"${applied ? "" : " disabled"}>${uiLabel("library.style-selection-clear")}</button>
       </footer>`;
-    detailNode.querySelector("h3")!.textContent = currentDetail.entry.name;
-    detailNode.querySelector<HTMLElement>(".style-selected-summary")!.textContent = currentDetail.entry.summary;
-    detailNode.querySelector<HTMLElement>(".style-effect-grid")!.replaceChildren(...effectCards);
-    const count = detailNode.querySelector<HTMLElement>(".style-effect-count")!;
-    count.textContent = t("library.style-effect-count", { count: urls.length });
-    count.title = `${currentDetail.metadata.source.durationSec.toFixed(2)} s · ${currentDetail.metadata.source.width} x ${currentDetail.metadata.source.height} · ${currentDetail.metadata.source.fps} fps`;
-    detailNode.querySelector<HTMLElement>(".style-selected-tags")!.replaceChildren(...currentDetail.entry.tags.slice(0, 4).map((tag) => {
-      const item = document.createElement("span");
-      item.textContent = tag;
-      return item;
-    }));
-    const picker = detailNode.querySelector<HTMLInputElement>(".style-effect-picker input")!;
-    picker.checked = selectedStyleIds.has(currentDetail.entry.id);
-    picker.disabled = selectionSaving;
-    picker.setAttribute("aria-label", `${t("library.style-selection-use")}: ${currentDetail.entry.name}`);
-    picker.addEventListener("change", () => {
-      const next = new Set(selectedStyleIds);
-      if (picker.checked) next.add(currentDetail.entry.id);
-      else next.delete(currentDetail.entry.id);
-      void saveSelection(next);
+
+    const image = detailNode.querySelector<HTMLImageElement>(".smart-style-thumb img")!;
+    image.src = urls[0] ?? currentDetail.assets.preview;
+    image.alt = t("library.smart-style-product");
+    image.loading = "eager";
+
+    const card = detailNode.querySelector<HTMLButtonElement>(".smart-style-card")!;
+    card.disabled = selectionSaving;
+    card.addEventListener("click", () => {
+      if (!selectedStyleIds.has(currentDetail.entry.id)) {
+        void saveSelection(new Set([currentDetail.entry.id]));
+      }
     });
-    detailNode.querySelector<HTMLAnchorElement>("[data-source]")!.href = currentDetail.assets.source;
-    detailNode.querySelector<HTMLAnchorElement>("[data-transcript]")!.href = currentDetail.assets.transcript;
+    const clear = detailNode.querySelector<HTMLButtonElement>(".smart-style-clear")!;
+    clear.addEventListener("click", () => {
+      if (selectedStyleIds.has(currentDetail.entry.id)) void saveSelection(new Set());
+    });
   };
 
   const select = async (id: string): Promise<void> => {
     selected = id;
-    heading.textContent = entries.find((entry) => entry.id === id)?.name ?? uiLabel("library.style-library-title");
+    heading.textContent = t("library.style-library-title");
     showStatus(t("library.style-loading-detail"));
     renderNameRail();
     const current = ++request;
@@ -289,7 +274,7 @@ export function createStylesPane(): StylesPane {
           if (next[0] === undefined) {
             selected = undefined;
             detail = undefined;
-            heading.textContent = uiLabel("library.style-library-title");
+            heading.textContent = t("library.style-library-title");
             renderNameRail();
             renderDetail();
           } else {
@@ -362,7 +347,7 @@ export function createStylesPane(): StylesPane {
 
   const refresh = async (): Promise<void> => {
     showStatus(t("library.style-loading"));
-    heading.textContent = uiLabel("library.style-library-title");
+    heading.textContent = t("library.style-library-title");
     try {
       const [response, selectionResponse] = await Promise.all([
         fetch("/__studio/style-library"),
@@ -381,6 +366,9 @@ export function createStylesPane(): StylesPane {
       loaded = true;
       showStatus();
       const shown = visibleEntries();
+      if (selectedStyleIds.size === 0 && entries.some((entry) => entry.id === featuredStyleId)) {
+        await saveSelection(new Set([featuredStyleId]));
+      }
       if (selected === undefined || !shown.some((entry) => entry.id === selected)) {
         selected = shown[0]?.id;
         detail = undefined;
