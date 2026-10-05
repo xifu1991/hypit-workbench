@@ -146,6 +146,40 @@ async function version(executable: string, timeoutMs: number, sharedLibraryPath?
   return line;
 }
 
+/**
+ * `-autorotate` used to take a value (`-autorotate 1`); FFmpeg 9 turned it into
+ * a bare flag, and a binary that still expects a value swallows the following
+ * `-i` when the flag carries none. Probe the deployed binary once per process so
+ * a single execution body serves both generations of the toolchain.
+ */
+const autorotateArgumentsCache = new Map<string, Promise<readonly string[]>>();
+
+function autorotateArguments(env: MediaExecutionEnvironment): Promise<readonly string[]> {
+  const key = `${env.ffmpegPath}\u0000${env.sharedLibraryPath ?? ""}`;
+  const cached = autorotateArgumentsCache.get(key);
+  if (cached !== undefined) return cached;
+  const probe = (async (): Promise<readonly string[]> => {
+    try {
+      await runProcess({
+        executable: env.ffmpegPath,
+        argv: [
+          "-hide_banner", "-loglevel", "error", "-autorotate",
+          "-f", "lavfi", "-i", "color=c=black:s=32x32:d=0.04",
+          "-frames:v", "1", "-f", "null", "-",
+        ],
+        timeoutMs: env.processTimeoutMs,
+        maxStdoutBytes: 64 * 1024,
+        ...(env.sharedLibraryPath === undefined ? {} : { sharedLibraryPath: env.sharedLibraryPath }),
+      });
+      return ["-autorotate"];
+    } catch {
+      return ["-autorotate", "1"];
+    }
+  })();
+  autorotateArgumentsCache.set(key, probe);
+  return probe;
+}
+
 async function sourceBytes(env: MediaExecutionEnvironment, source: BlobRef): Promise<Uint8Array> {
   const bytes = await env.artifacts.get(source);
   assert(bytes !== undefined, `Media source ${source.resource} is unavailable`);
@@ -678,8 +712,9 @@ export async function executeNormalizeMedia(
         "scale=trunc(iw*max(sar\\,1)/2)*2:trunc(ih*max(1/sar\\,1)/2)*2",
         "setsar=1",
       ].join(",");
+      const autorotate = await autorotateArguments(env);
       const visualInput = animation === undefined
-        ? [...encoding.inputArgs, "-autorotate", "-i", input, "-map", `0:${plan.video.index}`]
+        ? [...encoding.inputArgs, ...autorotate, "-i", input, "-map", `0:${plan.video.index}`]
         : ["-f", "concat", "-safe", "0", "-i", await animatedWebpConcat(env, animation, work), "-map", "0:v:0"];
       // The execution format must retain the source's alpha while materializing
       // the program clock. Both encodings publish the same SynchronizedMedia type.
