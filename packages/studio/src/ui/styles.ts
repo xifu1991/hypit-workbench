@@ -1,10 +1,11 @@
 import type { StudioSnapshot } from "../shared.js";
 import { t, uiAttribute, uiLabel, uiText } from "./i18n.js";
+import type { Message } from "./i18n.js";
 import { icon } from "./icons.js";
 import { createSidebarPanel } from "./sidebar-panel.js";
 
 type StyleStatus = "analyzed" | "draft" | "retired" | "verified";
-type StyleMode = "product" | "game";
+type StyleMode = "product" | "manhua" | "tech";
 
 type StyleEntry = {
   readonly id: string;
@@ -36,7 +37,11 @@ export type StylesPane = {
 };
 
 const productStyleId = "armani-yulong-clean-talk";
-const gamePreviewStyleId = "black-circle-pip-scene-tags";
+const manhuaPreviewStyleId = "black-circle-pip-scene-tags";
+const techPreviewStyleId = "tech-share-chapter-progress";
+// Styles carrying this tag belong to the tech-sharing mode; they are kept out of
+// the product-explainer list so the two libraries do not mix.
+const techStyleTag = "技术分享";
 
 export function createStylesPane(): StylesPane {
   const panel = createSidebarPanel("layers", "library.style-categories");
@@ -74,10 +79,14 @@ export function createStylesPane(): StylesPane {
       return;
     }
     const product = entries.find((entry) => entry.id === productStyleId) ?? entries[0];
-    const game = entries.find((entry) => entry.id === gamePreviewStyleId)
+    const manhua = entries.find((entry) => entry.id === manhuaPreviewStyleId)
       ?? entries.find((entry) => entry.id !== product?.id)
       ?? product;
-    if (product === undefined || game === undefined) {
+    const tech = entries.find((entry) => entry.id === techPreviewStyleId)
+      ?? entries.find((entry) => entry.tags.includes(techStyleTag))
+      ?? entries.find((entry) => entry.id !== product?.id && entry.id !== manhua?.id)
+      ?? product;
+    if (product === undefined || manhua === undefined || tech === undefined) {
       renderEmpty();
       return;
     }
@@ -98,7 +107,8 @@ export function createStylesPane(): StylesPane {
     const grid = detailNode.querySelector<HTMLElement>(".smart-style-grid")!;
     const options = [
       { id: "product" as const, entry: product, label: "library.smart-style-product" as const },
-      { id: "game" as const, entry: game, label: "library.smart-style-game" as const },
+      { id: "manhua" as const, entry: manhua, label: "library.smart-style-manhua" as const },
+      { id: "tech" as const, entry: tech, label: "library.smart-style-tech" as const },
     ];
     grid.replaceChildren(...options.map(({ id, entry, label }) => {
       const applied = mode === id;
@@ -128,23 +138,43 @@ export function createStylesPane(): StylesPane {
     }));
 
     const decomposedGrid = detailNode.querySelector<HTMLElement>(".smart-style-decomposed-grid")!;
-    if (mode === "game") {
+    const renderPending = (title: Message, detail: Message, hint: Message): void => {
       uiText(detailNode.querySelector(".smart-style-decomposed header small")!, "library.smart-style-pending");
-      uiText(detailNode.querySelector(".smart-style-decomposed-hint")!, "library.smart-style-decomposed-game-hint");
+      uiText(detailNode.querySelector(".smart-style-decomposed-hint")!, hint);
       const empty = document.createElement("div");
       empty.className = "smart-style-decomposed-empty";
       empty.innerHTML = `<span>${icon("plus")}</span><strong></strong><p></p>`;
-      uiText(empty.querySelector("strong")!, "library.smart-style-decomposed-game");
-      uiText(empty.querySelector("p")!, "library.smart-style-decomposed-game-detail");
+      uiText(empty.querySelector("strong")!, title);
+      uiText(empty.querySelector("p")!, detail);
       decomposedGrid.replaceChildren(empty);
+    };
+    const techStyles = entries.filter((entry) => entry.tags.includes(techStyleTag));
+    const listed = mode === "tech"
+      ? techStyles
+      : entries.filter((entry) => !entry.tags.includes(techStyleTag));
+    if (mode === "manhua") {
+      renderPending(
+        "library.smart-style-decomposed-manhua",
+        "library.smart-style-decomposed-manhua-detail",
+        "library.smart-style-decomposed-manhua-hint",
+      );
+    } else if (listed.length === 0) {
+      renderPending(
+        "library.smart-style-decomposed-tech",
+        "library.smart-style-decomposed-tech-detail",
+        "library.smart-style-decomposed-tech-hint",
+      );
     } else {
       uiText(
         detailNode.querySelector(".smart-style-decomposed header small")!,
         "library.smart-style-decomposed-count",
-        { count: entries.length },
+        { count: listed.length },
       );
-      uiText(detailNode.querySelector(".smart-style-decomposed-hint")!, "library.smart-style-decomposed-product");
-      const shown = [...entries].sort((left, right) => {
+      uiText(
+        detailNode.querySelector(".smart-style-decomposed-hint")!,
+        mode === "tech" ? "library.smart-style-decomposed-tech" : "library.smart-style-decomposed-product",
+      );
+      const shown = [...listed].sort((left, right) => {
         if (left.id === productStyleId) return -1;
         if (right.id === productStyleId) return 1;
         return left.name.localeCompare(right.name, "zh-CN");

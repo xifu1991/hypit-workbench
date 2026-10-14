@@ -412,6 +412,30 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  examples/style-clone-1328770777/packages/style-board:
+    devDependencies:
+      '@hypit/hypit':
+        specifier: workspace:*
+        version: link:../../../..
+      '@types/node':
+        specifier: 24.10.1
+        version: 24.10.1
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
+  examples/style-clone-148971474/packages/style-board:
+    devDependencies:
+      '@hypit/hypit':
+        specifier: workspace:*
+        version: link:../../../..
+      '@types/node':
+        specifier: 24.10.1
+        version: 24.10.1
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
   packages/artifact:
     dependencies:
       '@hypit/protocol':
@@ -2148,6 +2172,8 @@ importers:
   packages/project-context-node: {}
 
   packages/protocol: {}
+
+  packages/provider-doubao-tts: {}
 
   packages/provider-hyperframes-local:
     dependencies:

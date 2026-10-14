@@ -1,0 +1,51 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="pipeline" from="@hypit/media-pipeline@1"/>
+  <import as="picture" from="@hypit/media-track@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="space" from="@hypit/spatial@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./edit.svs"/>
+
+  <media:Video id="finalVideo" src="./assets/lamer_unboxing_20s.mp4"/>
+
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="598f"/>
+
+  <space:Canvas id="canvas" width="1080" height="1920"/>
+  <space:Frame id="full" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+
+  <pipeline:Normalize id="prepared" source={finalVideo} video="primary-moving" audio="default" span-authority="video" clock={clock}/>
+
+  <picture:Track id="picture" timeline={edit.timeline} canvas={canvas}>
+    <picture:Item id="shot-01-bag-arrives" media={prepared.media} frame={full} start="0f" end="81f" appearance={look.media.shot-01-bag-arrives}/>
+    <picture:Item id="shot-02-whole-set" media={prepared.media} frame={full} start="81f" end="143f" appearance={look.media.shot-02-whole-set}/>
+    <picture:Item id="shot-03-untie-ribbon" media={prepared.media} frame={full} start="143f" end="226f" appearance={look.media.shot-03-untie-ribbon}/>
+    <picture:Item id="shot-04-pouch-reveal" media={prepared.media} frame={full} start="226f" end="296f" appearance={look.media.shot-04-pouch-reveal}/>
+    <picture:Item id="shot-05-drawstring" media={prepared.media} frame={full} start="296f" end="372f" appearance={look.media.shot-05-drawstring}/>
+    <picture:Item id="shot-06-small-box" media={prepared.media} frame={full} start="372f" end="434f" appearance={look.media.shot-06-small-box}/>
+    <picture:Item id="shot-07-box-detail" media={prepared.media} frame={full} start="434f" end="510f" appearance={look.media.shot-07-box-detail}/>
+    <picture:Item id="shot-08-hold-and-tease" media={prepared.media} frame={full} start="510f" end="598f" appearance={look.media.shot-08-hold-and-tease}/>
+  </picture:Track>
+
+  <audio:Track id="voice" timeline={edit.timeline}>
+    <audio:Item id="voice-01" source={prepared.media} start="8f" end="81f" trim-start="8f" trim-end="81f" playback="once" gain="1"/>
+    <audio:Item id="voice-02" source={prepared.media} start="85f" end="143f" trim-start="85f" trim-end="143f" playback="once" gain="1"/>
+    <audio:Item id="voice-03" source={prepared.media} start="146f" end="226f" trim-start="146f" trim-end="226f" playback="once" gain="1"/>
+    <audio:Item id="voice-04" source={prepared.media} start="230f" end="296f" trim-start="230f" trim-end="296f" playback="once" gain="1"/>
+    <audio:Item id="voice-05" source={prepared.media} start="300f" end="372f" trim-start="300f" trim-end="372f" playback="once" gain="1"/>
+    <audio:Item id="voice-06" source={prepared.media} start="376f" end="434f" trim-start="376f" trim-end="434f" playback="once" gain="1"/>
+    <audio:Item id="voice-07" source={prepared.media} start="437f" end="510f" trim-start="437f" trim-end="510f" playback="once" gain="1"/>
+    <audio:Item id="voice-08" source={prepared.media} start="514f" end="583f" trim-start="514f" trim-end="583f" playback="once" gain="1"/>
+  </audio:Track>
+
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={picture.visual}/>
+    <film:Track source={voice.audio}/>
+  </film:Film>
+
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

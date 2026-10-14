@@ -1,0 +1,15 @@
+<?svml using="@hypit/svs@1"?>
+<sheet version="1">
+ film.main { background: #000000; }
+ media.shot-01-paper-bag { stack-order: 0; fit: cover; playback: once-start; trim-start: 0; trim-end: 146; }
+ media.shot-02-ribbon { stack-order: 0; fit: cover; playback: once-start; trim-start: 146; trim-end: 226; }
+ media.shot-03-pouch { stack-order: 0; fit: cover; playback: once-start; trim-start: 226; trim-end: 375; }
+ media.shot-04-mini-box { stack-order: 0; fit: cover; playback: once-start; trim-start: 375; trim-end: 446; }
+ media.shot-05-mini-set { stack-order: 0; fit: cover; playback: once-start; trim-start: 446; trim-end: 628; }
+ media.shot-06-gift-box { stack-order: 0; fit: cover; playback: once-start; trim-start: 628; trim-end: 862; }
+ media.shot-07-treatment-lotion { stack-order: 0; fit: cover; playback: once-start; trim-start: 862; trim-end: 1029; }
+ media.shot-08-concentrate { stack-order: 0; fit: cover; playback: once-start; trim-start: 1029; trim-end: 1220; }
+ media.shot-09-cleansing-foam { stack-order: 0; fit: cover; playback: once-start; trim-start: 1220; trim-end: 1350; }
+ media.shot-10-creme-de-la-mer { stack-order: 0; fit: cover; playback: once-start; trim-start: 1350; trim-end: 1517; }
+ media.shot-11-eye-concentrate { stack-order: 0; fit: cover; playback: once-start; trim-start: 1517; trim-end: 1840; }
+</sheet>

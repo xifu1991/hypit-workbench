@@ -127,10 +127,9 @@ button:focus-visible, textarea:focus-visible {
   user-select: none;
 }
 .brand { display: flex; align-items: center; min-width: 0; }
-.brand-mark { height: 22px; display: flex; align-items: center; gap: 8px; overflow: visible; }
-.brand-mark svg { display: block; flex: none; overflow: visible; }
-.brand-symbol { width: 22px; height: 20px; color: var(--brand-foreground); }
-.brand-wordmark { width: 43px; height: 20px; color: var(--brand-foreground); }
+.brand-mark { height: 22px; display: flex; align-items: center; gap: 3px; overflow: visible; }
+.brand-name { color: var(--brand-foreground); font: 600 14px/1 var(--font-ui); letter-spacing: .3px; white-space: nowrap; }
+.brand-dot { position: relative; top: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--brand-500); flex: none; }
 .project-title {
   min-width: 0;
   justify-self: center;
@@ -375,6 +374,7 @@ button:focus-visible, textarea:focus-visible {
 .library-tab > span { position: relative; display: grid; place-items: center; width: 16px; height: 16px; flex: none; }
 .library .icon { width: 14px; height: 14px; }
 .library-tab > strong { overflow: hidden; font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.library-tab-settings { flex: none; margin-left: auto; padding: 0 2px; }
 .library-view { flex: 1; min-width: 0; min-height: 0; display: none; flex-direction: column; }
 .library-view.active { display: flex; }
 .library-refresh {
@@ -394,6 +394,95 @@ button:focus-visible, textarea:focus-visible {
 .library-refresh .icon { width: 14px; height: 14px; }
 .library.is-refreshing .library-refresh .icon { animation: library-spin 700ms linear infinite; }
 @keyframes library-spin { to { transform: rotate(360deg); } }
+
+/* Provider settings */
+.provider-page {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 12px 10px 28px;
+  background: #121316;
+}
+.provider-groups { display: grid; gap: 12px; }
+.provider-group {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #25272c;
+  border-radius: 4px;
+  background: #191b20;
+}
+.provider-group > header { color: #d9dce1; font-size: 10px; font-weight: 650; }
+.provider-fields { min-width: 0; display: grid; gap: 7px; }
+.provider-field { min-width: 0; display: grid; gap: 3px; }
+.provider-field-caption { color: #858b95; font-size: 8px; }
+.provider-field input[type="text"],
+.provider-field input[type="password"],
+.provider-field input[type="number"],
+.provider-field select {
+  width: 100%;
+  height: 27px;
+  min-width: 0;
+  padding: 0 7px;
+  border: 1px solid #343840;
+  border-radius: 3px;
+  outline: none;
+  background: #202227;
+  color: #e0e2e6;
+  font: 10px var(--font-ui);
+}
+.provider-field input:focus,
+.provider-field select:focus { border-color: #656b78; }
+.provider-field input::placeholder { color: #666c76; }
+.provider-field select { appearance: none; }
+.provider-switch { display: flex; align-items: center; height: 27px; }
+.provider-switch input {
+  appearance: none;
+  position: relative;
+  width: 34px;
+  height: 18px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #292b30;
+}
+.provider-switch input::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #a9acb3;
+  transition: transform 100ms ease;
+}
+.provider-switch input:checked { background: #45484f; }
+.provider-switch input:checked::before { transform: translateX(16px); background: #f2f3f5; }
+.provider-switch input:focus-visible { box-shadow: 0 0 0 1px #777b84; }
+.provider-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.provider-actions button {
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid #40444c;
+  border-radius: 4px;
+  background: #23262b;
+  color: #d5d8dd;
+  font-size: 9px;
+}
+.provider-actions button[data-primary] {
+  border-color: color-mix(in srgb, var(--interaction-accent) 48%, #333);
+  background: var(--brand-soft);
+  color: var(--brand-200);
+}
+.provider-actions button:disabled { opacity: .5; }
+.provider-note { overflow-wrap: anywhere; color: #717883; font-size: 9px; line-height: 14px; }
 
 .sidebar-panel {
   flex: 1;

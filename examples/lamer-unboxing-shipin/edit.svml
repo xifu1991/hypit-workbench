@@ -1,0 +1,76 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <import as="media" from="@hypit/media@1"/>
+  <import as="pipeline" from="@hypit/media-pipeline@1"/>
+  <import as="picture" from="@hypit/media-track@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="space" from="@hypit/spatial@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="render" from="@hypit/render-hyperframes@1"/>
+  <import as="look" source="./edit.svs"/>
+
+  <media:Video id="finalVideo" src="./assets/final.mp4"/>
+
+  <time:Clock id="clock" frame-rate="30"/>
+  <time:Timeline id="edit" clock={clock} end="1842f"/>
+
+  <space:Canvas id="canvas" width="1080" height="1920"/>
+  <space:Frame id="full" within={canvas} left="0%" top="0%" right="100%" bottom="100%"/>
+
+  <pipeline:Normalize id="prepared" source={finalVideo} video="primary-moving" audio="default" span-authority="video" clock={clock}/>
+
+  <picture:Track id="picture" timeline={edit.timeline} canvas={canvas}>
+    <picture:Item id="shot-01-paper-bag" media={prepared.media} frame={full} start="0f" end="175f" appearance={look.media.shot-01-paper-bag}/>
+    <picture:Item id="shot-02-ribbon" media={prepared.media} frame={full} start="175f" end="288f" appearance={look.media.shot-02-ribbon}/>
+    <picture:Item id="shot-03-pouch" media={prepared.media} frame={full} start="288f" end="406f" appearance={look.media.shot-03-pouch}/>
+    <picture:Item id="shot-04-mini-box" media={prepared.media} frame={full} start="406f" end="469f" appearance={look.media.shot-04-mini-box}/>
+    <picture:Item id="shot-05-mini-set" media={prepared.media} frame={full} start="469f" end="659f" appearance={look.media.shot-05-mini-set}/>
+    <picture:Item id="shot-06-gift-box" media={prepared.media} frame={full} start="659f" end="838f" appearance={look.media.shot-06-gift-box}/>
+    <picture:Item id="shot-07-treatment-lotion" media={prepared.media} frame={full} start="838f" end="1007f" appearance={look.media.shot-07-treatment-lotion}/>
+    <picture:Item id="shot-08-concentrate" media={prepared.media} frame={full} start="1007f" end="1208f" appearance={look.media.shot-08-concentrate}/>
+    <picture:Item id="shot-09-cleansing-foam" media={prepared.media} frame={full} start="1208f" end="1340f" appearance={look.media.shot-09-cleansing-foam}/>
+    <picture:Item id="shot-10-creme-de-la-mer" media={prepared.media} frame={full} start="1340f" end="1466f" appearance={look.media.shot-10-creme-de-la-mer}/>
+    <picture:Item id="shot-11-eye-concentrate" media={prepared.media} frame={full} start="1466f" end="1842f" appearance={look.media.shot-11-eye-concentrate}/>
+  </picture:Track>
+
+  <audio:Track id="voice" timeline={edit.timeline}>
+    <audio:Item id="voice-01" source={prepared.media} start="8f" end="59f" trim-start="8f" trim-end="59f" playback="once" gain="1"/>
+    <audio:Item id="voice-02" source={prepared.media} start="63f" end="124f" trim-start="63f" trim-end="124f" playback="once" gain="1"/>
+    <audio:Item id="voice-03" source={prepared.media} start="127f" end="175f" trim-start="127f" trim-end="175f" playback="once" gain="1"/>
+    <audio:Item id="voice-04" source={prepared.media} start="179f" end="228f" trim-start="179f" trim-end="228f" playback="once" gain="1"/>
+    <audio:Item id="voice-05" source={prepared.media} start="231f" end="288f" trim-start="231f" trim-end="288f" playback="once" gain="1"/>
+    <audio:Item id="voice-06" source={prepared.media} start="291f" end="342f" trim-start="291f" trim-end="342f" playback="once" gain="1"/>
+    <audio:Item id="voice-07" source={prepared.media} start="346f" end="406f" trim-start="346f" trim-end="406f" playback="once" gain="1"/>
+    <audio:Item id="voice-08" source={prepared.media} start="410f" end="469f" trim-start="410f" trim-end="469f" playback="once" gain="1"/>
+    <audio:Item id="voice-09" source={prepared.media} start="473f" end="529f" trim-start="473f" trim-end="529f" playback="once" gain="1"/>
+    <audio:Item id="voice-10" source={prepared.media} start="532f" end="609f" trim-start="532f" trim-end="609f" playback="once" gain="1"/>
+    <audio:Item id="voice-11" source={prepared.media} start="613f" end="659f" trim-start="613f" trim-end="659f" playback="once" gain="1"/>
+    <audio:Item id="voice-12" source={prepared.media} start="663f" end="721f" trim-start="663f" trim-end="721f" playback="once" gain="1"/>
+    <audio:Item id="voice-13" source={prepared.media} start="725f" end="785f" trim-start="725f" trim-end="785f" playback="once" gain="1"/>
+    <audio:Item id="voice-14" source={prepared.media} start="788f" end="838f" trim-start="788f" trim-end="838f" playback="once" gain="1"/>
+    <audio:Item id="voice-15" source={prepared.media} start="842f" end="890f" trim-start="842f" trim-end="890f" playback="once" gain="1"/>
+    <audio:Item id="voice-16" source={prepared.media} start="894f" end="946f" trim-start="894f" trim-end="946f" playback="once" gain="1"/>
+    <audio:Item id="voice-17" source={prepared.media} start="950f" end="1007f" trim-start="950f" trim-end="1007f" playback="once" gain="1"/>
+    <audio:Item id="voice-18" source={prepared.media} start="1011f" end="1078f" trim-start="1011f" trim-end="1078f" playback="once" gain="1"/>
+    <audio:Item id="voice-19" source={prepared.media} start="1082f" end="1149f" trim-start="1082f" trim-end="1149f" playback="once" gain="1"/>
+    <audio:Item id="voice-20" source={prepared.media} start="1153f" end="1208f" trim-start="1153f" trim-end="1208f" playback="once" gain="1"/>
+    <audio:Item id="voice-21" source={prepared.media} start="1212f" end="1276f" trim-start="1212f" trim-end="1276f" playback="once" gain="1"/>
+    <audio:Item id="voice-22" source={prepared.media} start="1280f" end="1340f" trim-start="1280f" trim-end="1340f" playback="once" gain="1"/>
+    <audio:Item id="voice-23" source={prepared.media} start="1344f" end="1410f" trim-start="1344f" trim-end="1410f" playback="once" gain="1"/>
+    <audio:Item id="voice-24" source={prepared.media} start="1414f" end="1466f" trim-start="1414f" trim-end="1466f" playback="once" gain="1"/>
+    <audio:Item id="voice-25" source={prepared.media} start="1469f" end="1530f" trim-start="1469f" trim-end="1530f" playback="once" gain="1"/>
+    <audio:Item id="voice-26" source={prepared.media} start="1534f" end="1600f" trim-start="1534f" trim-end="1600f" playback="once" gain="1"/>
+    <audio:Item id="voice-27" source={prepared.media} start="1604f" end="1653f" trim-start="1604f" trim-end="1653f" playback="once" gain="1"/>
+    <audio:Item id="voice-28" source={prepared.media} start="1657f" end="1706f" trim-start="1657f" trim-end="1706f" playback="once" gain="1"/>
+    <audio:Item id="voice-29" source={prepared.media} start="1710f" end="1777f" trim-start="1710f" trim-end="1777f" playback="once" gain="1"/>
+    <audio:Item id="voice-30" source={prepared.media} start="1780f" end="1824f" trim-start="1780f" trim-end="1824f" playback="once" gain="1"/>
+  </audio:Track>
+
+  <film:Film id="main" canvas={canvas} timeline={edit.timeline} appearance={look.film.main}>
+    <film:Track source={picture.visual}/>
+    <film:Track source={voice.audio}/>
+  </film:Film>
+
+  <render:Video id="final" composition={main.composition} timeline={edit.timeline}/>
+</svml>

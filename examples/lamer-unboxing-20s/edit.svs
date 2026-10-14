@@ -1,0 +1,12 @@
+<?svml using="@hypit/svs@1"?>
+<sheet version="1">
+ film.main { background: #000000; }
+ media.shot-01-bag-arrives { stack-order: 0; fit: cover; playback: once-start; trim-start: 0; trim-end: 81; }
+ media.shot-02-whole-set { stack-order: 0; fit: cover; playback: once-start; trim-start: 81; trim-end: 143; }
+ media.shot-03-untie-ribbon { stack-order: 0; fit: cover; playback: once-start; trim-start: 143; trim-end: 226; }
+ media.shot-04-pouch-reveal { stack-order: 0; fit: cover; playback: once-start; trim-start: 226; trim-end: 296; }
+ media.shot-05-drawstring { stack-order: 0; fit: cover; playback: once-start; trim-start: 296; trim-end: 372; }
+ media.shot-06-small-box { stack-order: 0; fit: cover; playback: once-start; trim-start: 372; trim-end: 434; }
+ media.shot-07-box-detail { stack-order: 0; fit: cover; playback: once-start; trim-start: 434; trim-end: 510; }
+ media.shot-08-hold-and-tease { stack-order: 0; fit: cover; playback: once-start; trim-start: 510; trim-end: 598; }
+</sheet>

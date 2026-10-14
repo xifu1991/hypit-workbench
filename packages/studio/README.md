@@ -33,6 +33,18 @@ The upper-left library is intentionally not a filesystem browser:
 Source, Tasks and Artifacts use the shared `ui/sidebar-panel.ts` layout and navigation buttons. Each view
 owns its toolbar content, data and actions; the shared shell owns geometry and navigation styling.
 
+The tab strip ends with an icon-only Provider settings tab. It edits the Volcengine credentials the
+Doubao ASR and voice-clone providers read: `<workspace>/config.json`, or `HYPIT_PROVIDER_CONFIG` when
+that is set. A stored secret is never sent to the browser—the pane only learns that a value exists—and a
+blank field keeps whatever is already stored, so saving a partly filled form cannot erase a credential.
+Only the credential style the file already uses is shown: a file with `api_key` shows that field alone,
+while a file with `app_id`/`access_token` shows that pair instead, because the providers accept one or the
+other and never both.
+When `HYPIT_SETTINGS_URL` is set, Pull reads that URL (with an optional `HYPIT_SETTINGS_TOKEN` bearer) and
+merges ordinary fields such as an endpoint or a shared speaker; secret fields in the remote document are
+refused and reported instead of applied. Rendering, media and the credential file itself stay on this
+machine.
+
 Views load on entry; returning to Tasks preserves its loaded list and selection. Explicit Refresh reads the latest state. There is no library polling.
 Refresh replaces the current snapshot; scrolling to the end loads more finished Results. Failed
 refreshes preserve the last view and show the error. Artifacts show project media through an icon sidebar: All media, Videos, Images and Audio.

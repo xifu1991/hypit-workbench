@@ -27,6 +27,8 @@ above the current directory defines the project (or the current directory if non
 Without --runtime, Studio uses that project's .hypit/runtime selection.
 The style library defaults to <workspace>/style-library or HYPIT_STYLE_LIBRARY.
 The sticker library defaults to <workspace>/sticker-library or HYPIT_STICKER_LIBRARY.
+The provider settings pane edits <workspace>/config.json, or HYPIT_PROVIDER_CONFIG.
+Set HYPIT_SETTINGS_URL (and optional HYPIT_SETTINGS_TOKEN) to pull shared settings.
 The server prints its project, Run, Runtime selection and browser URL.
 Press Ctrl+C to stop it.
 `);
@@ -103,6 +105,7 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
   const { studioPlugin } = await import("./src/server.js");
   const { studioStyleLibraryPlugin } = await import("./src/style-library-server.js");
   const { studioStickerLibraryPlugin } = await import("./src/sticker-library-server.js");
+  const { studioProviderSettingsPlugin } = await import("./src/provider-settings-server.js");
   const { studioFeedbackPlugin } = await import("./src/feedback-server.js");
   const { inspectStudioRun } = await import("./src/studio-preflight.js");
   const languages = await studioLanguages(values.get("locale-pack") ?? [], invokedFrom, packageRoot);
@@ -178,6 +181,7 @@ export async function runStudio(argv: readonly string[], io: Pick<CliIo, "write"
       studioFeedbackPlugin(workspaceRoot, runPath),
       studioStyleLibraryPlugin({ root: styleLibraryRoot, workspaceRoot }),
       studioStickerLibraryPlugin({ root: stickerLibraryRoot, workspaceRoot }),
+      studioProviderSettingsPlugin({ workspaceRoot }),
       studioPlugin({
       source,
       runPath,

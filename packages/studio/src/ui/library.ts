@@ -14,8 +14,9 @@ import { icon } from "./icons.js";
 import { mergeStudioArtifacts } from "../library-media.js";
 import { createStylesPane } from "./styles.js";
 import { createStickersPane } from "./stickers.js";
+import { createProvidersPane } from "./providers.js";
 
-type LibrarySection = "source" | "styles" | "tasks" | "artifacts";
+type LibrarySection = "source" | "styles" | "tasks" | "artifacts" | "providers";
 type ArtifactFilter = "all" | "video" | "image" | "audio" | "stickers";
 
 export type LibraryPane = {
@@ -276,13 +277,17 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
       <button type="button" class="library-tab" data-library-tab="artifacts" role="tab" aria-selected="false">
         <span>${icon("results")}</span><strong>${uiLabel("library.artifacts")}</strong>
       </button>
+      <button type="button" class="library-tab library-tab-settings" data-library-tab="providers" role="tab" aria-selected="false" ${uiAttribute("aria-label", "library.providers")} ${uiAttribute("title", "library.providers")}>
+        <span>${icon("tune")}</span>
+      </button>
     </div>
     <section class="library-view" data-library-view="source">
     </section>
     <section class="library-view" data-library-view="tasks"></section>
     <section class="library-view active" data-library-view="styles"></section>
     <section class="library-view" data-library-view="artifacts">
-    </section>`;
+    </section>
+    <section class="library-view" data-library-view="providers"></section>`;
 
   const sourcePanel = createSidebarPanel("panel", "library.referenced-source-files");
   uiAttr(sourcePanel.navigation, "aria-label", "library.referenced-source-files");
@@ -292,6 +297,8 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
   element.querySelector('[data-library-view="source"]')!.append(sourcePanel.element);
   const stylesPane = createStylesPane();
   element.querySelector('[data-library-view="styles"]')!.append(stylesPane.element);
+  const providersPane = createProvidersPane();
+  element.querySelector('[data-library-view="providers"]')!.append(providersPane.element);
   const stickersPane = createStickersPane();
   const taskPanel = createSidebarPanel("panel", "library.task-categories");
   uiAttr(taskPanel.navigation, "aria-label", "library.task-categories");
@@ -546,6 +553,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     if (next === "artifacts") renderArtifacts();
     if (next === "tasks") renderTasks();
     if (next === "styles") stylesPane.activate();
+    if (next === "providers") providersPane.activate();
     if (next === "artifacts" && artifactFilter === "stickers") stickersPane.activate();
     else if ((next === "tasks" || next === "artifacts") && reload) void refresh(next);
     else request?.abort();
@@ -623,7 +631,7 @@ export function createLibraryPane(code: CodePane, openArtifact: (artifact: Studi
     refresh: async () => {
       if (active === "styles") await stylesPane.refresh();
       else if (active === "artifacts" && artifactFilter === "stickers") await stickersPane.refresh();
-      else if (active !== "source") await refresh(active);
+      else if (active === "tasks" || active === "artifacts") await refresh(active);
     },
   };
 }

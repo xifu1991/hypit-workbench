@@ -1,0 +1,7 @@
+<?svml using="@hypit/run-markup@1"?>
+<svrun version="1">
+  <author source="./edit.svml"/>
+  <file id="finalFile" type="@hypit/artifact@1#BlobArtifact" from="./assets/final.mp4" media-type="video/mp4"/>
+  <satisfy output="final.video" candidate="finalFile"/>
+  <target output="final.video"/>
+</svrun>
