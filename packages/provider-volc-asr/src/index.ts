@@ -9,6 +9,7 @@ export {
   readVolcConfig,
 } from "./config.js";
 export type {
+  HypitGatewayConfig,
   VolcAsrServiceConfig,
   VolcConfig,
   VolcObjectStorageConfig,

@@ -64,8 +64,10 @@ const volcRuntimeAdapter = createRuntimeEndpointAdapterFacet({
       }),
       diagnose: () => [{
         severity: "info",
-        code: "VOLC_ASR_CONFIGURED",
-        message: `Doubao ASR ${loaded.asr.resourceId} is configured from ${loaded.path}`,
+        code: loaded.gateway === undefined ? "VOLC_ASR_CONFIGURED" : "HYPIT_GATEWAY_ASR_CONFIGURED",
+        message: loaded.gateway === undefined
+          ? `Doubao ASR ${loaded.asr.resourceId} is configured from ${loaded.path}`
+          : `Doubao ASR is configured through the Hypit gateway at ${loaded.gateway.url}`,
         subject: context.instance,
       }],
     };

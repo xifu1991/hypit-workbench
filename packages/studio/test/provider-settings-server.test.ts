@@ -41,7 +41,7 @@ test("the settings endpoint reads, writes and reports errors over HTTP", async (
 
   const initial = await (await fetch(url)).json() as { path: string; groups: unknown[] };
   assert.equal(initial.path, configPath);
-  assert.equal(initial.groups.length, 3);
+  assert.equal(initial.groups.length, 4);
   assert.equal(JSON.stringify(initial).includes("kept-secret"), false);
 
   // A blank secret arrives as an absent field, so the stored key survives.
@@ -64,6 +64,41 @@ test("the settings endpoint reads, writes and reports errors over HTTP", async (
   assert.equal(rejected.status, 400);
   assert.match((await rejected.json() as { error: string }).error, /Unknown provider settings group/u);
   assert.deepEqual(await documentOf(configPath), document);
+});
+
+test("the settings endpoint checks the gateway without returning its tenant token", async (t) => {
+  const remote = createRemote((request, response) => {
+    assert.equal(request.url, "/gateway/v1/me");
+    assert.equal(request.headers.authorization, "Bearer hgt_check_token");
+    response.setHeader("content-type", "application/json");
+    response.end(JSON.stringify({
+      tenant: { id: "tenant_1", name: "测试客户", status: "active" },
+      wallet: { balanceFen: 1_000, reservedFen: 20, availableFen: 980 },
+      voices: [{ name: "旁白" }, { name: "男声" }],
+    }));
+  });
+  await new Promise<void>((resolve) => remote.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise<void>((resolve) => remote.close(() => resolve())));
+  const address = remote.address();
+  assert.ok(address !== null && typeof address === "object");
+
+  const { root, configPath } = await workspace(t, {
+    hypit_gateway: {
+      enabled: true,
+      url: `http://127.0.0.1:${address.port}`,
+      token: "hgt_check_token",
+      speaker: "旁白",
+    },
+  });
+  const url = await studio(t, root, configPath);
+  const response = await fetch(`${url}/gateway-check`, { method: "POST" });
+  assert.equal(response.status, 200);
+  const body = await response.json() as Record<string, unknown>;
+  assert.deepEqual(body.tenant, { id: "tenant_1", name: "测试客户", status: "active" });
+  assert.deepEqual(body.wallet, { balanceFen: 1_000, reservedFen: 20, availableFen: 980 });
+  assert.equal(body.voiceCount, 2);
+  assert.equal(body.defaultSpeaker, "旁白");
+  assert.equal(JSON.stringify(body).includes("hgt_check_token"), false);
 });
 
 test("pulling settings keeps remote secrets out of the local config file", async (t) => {

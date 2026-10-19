@@ -38,6 +38,16 @@ const usesAppCredentials = (values: Record<string, unknown>): boolean =>
 
 export const providerGroups: readonly ProviderGroup[] = [
   {
+    id: "hypit_gateway",
+    label: "providers.group.gateway",
+    fields: [
+      { key: "enabled", kind: "boolean", label: "providers.field.gateway-enabled" },
+      { key: "url", kind: "text", label: "providers.field.gateway-url", placeholder: "https://gateway.example.com" },
+      { key: "token", kind: "secret", label: "providers.field.gateway-token" },
+      { key: "speaker", kind: "text", label: "providers.field.gateway-speaker", placeholder: "默认音色" },
+    ],
+  },
+  {
     id: "volc_asr",
     label: "providers.group.asr",
     fields: [
@@ -144,6 +154,38 @@ async function readConfigFile(path: string): Promise<ConfigFile> {
   return { exists: true, document };
 }
 
+export type GatewayConnectionConfig = {
+  readonly url: string;
+  readonly token: string;
+  readonly speaker?: string;
+};
+
+/** Reads the gateway connection without returning it through the settings view. */
+export async function readGatewayConnectionConfig(path: string): Promise<GatewayConnectionConfig> {
+  const { exists, document } = await readConfigFile(path);
+  if (!exists) throw new Error(`Provider config does not exist at ${path}`);
+  const gateway = record(document.hypit_gateway);
+  if (gateway === null || gateway.enabled !== true) {
+    throw new Error("Enable the Hypit platform gateway and save the settings first.");
+  }
+  const rawUrl = typeof gateway.url === "string" ? gateway.url.trim() : "";
+  const rawToken = typeof gateway.token === "string" ? gateway.token.trim() : "";
+  if (rawUrl.length === 0) throw new Error("hypit_gateway.url is required");
+  if (rawToken.length === 0) throw new Error("hypit_gateway.token is required");
+  const parsed = new URL(rawUrl.includes("://") ? rawUrl : `https://${rawUrl}`);
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new Error("hypit_gateway.url must be an HTTP(S) endpoint");
+  }
+  const speaker = typeof gateway.speaker === "string" && gateway.speaker.trim().length > 0
+    ? gateway.speaker.trim()
+    : undefined;
+  return {
+    url: rawUrl.replace(/\/+$/u, ""),
+    token: rawToken,
+    ...(speaker === undefined ? {} : { speaker }),
+  };
+}
+
 function stored(value: unknown): boolean {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -169,20 +211,24 @@ function fieldView(field: ProviderField, group: Record<string, unknown>): Provid
 
 export async function readProviderSettings(path: string, remote: ProviderRemoteState): Promise<ProviderSettingsView> {
   const { exists, document } = await readConfigFile(path);
+  const gateway = record(document.hypit_gateway);
+  const gatewayEnabled = gateway?.enabled === true;
   return {
     format: "hypit.provider-settings@1",
     path,
     exists,
-    groups: providerGroups.map((group) => {
-      const values = record(document[group.id]) ?? {};
-      return {
-        id: group.id,
-        label: group.label,
-        fields: group.fields
-          .filter((field) => field.appliesWhen === undefined || field.appliesWhen(values))
-          .map((field) => fieldView(field, values)),
-      };
-    }),
+    groups: providerGroups
+      .filter((group) => !gatewayEnabled || group.id === "hypit_gateway")
+      .map((group) => {
+        const values = record(document[group.id]) ?? {};
+        return {
+          id: group.id,
+          label: group.label,
+          fields: group.fields
+            .filter((field) => field.appliesWhen === undefined || field.appliesWhen(values))
+            .map((field) => fieldView(field, values)),
+        };
+      }),
     remote,
   };
 }

@@ -8,6 +8,7 @@ import { join } from "node:path";
 import {
   providerSettingsPatch,
   pullProviderSettings,
+  readGatewayConnectionConfig,
   readProviderSettings,
   writeProviderSettings,
 } from "../src/provider-settings.js";
@@ -20,10 +21,16 @@ async function workspace(t: { after(callback: () => Promise<void>): void }): Pro
   return root;
 }
 
-test("reading provider settings reports stored secrets without returning them", async (t) => {
+test("gateway mode hides direct provider groups while preserving stored secrets", async (t) => {
   const root = await workspace(t);
   const path = join(root, "config.json");
   await writeFile(path, JSON.stringify({
+    hypit_gateway: {
+      enabled: true,
+      url: "https://gateway.example.com",
+      token: "hgt_live_token",
+      speaker: "旁白",
+    },
     volc_asr: { api_key: "AKIA-live-9999", endpoint: "https://openspeech.bytedance.com", enable_speaker: false },
     volc_tts: { speaker: "S_demo" },
     _备注: "hand written",
@@ -32,12 +39,33 @@ test("reading provider settings reports stored secrets without returning them", 
   const view = await readProviderSettings(path, offline);
   assert.equal(view.path, path);
   assert.equal(view.exists, true);
+  assert.deepEqual(view.groups.map((group) => group.id), ["hypit_gateway"]);
+  const gateway = view.groups.find((group) => group.id === "hypit_gateway");
+  assert.equal(gateway?.fields.find((field) => field.key === "enabled")?.value, true);
+  assert.equal(gateway?.fields.find((field) => field.key === "url")?.value, "https://gateway.example.com");
+  assert.equal(gateway?.fields.find((field) => field.key === "token")?.value, null);
+  assert.equal(gateway?.fields.find((field) => field.key === "token")?.stored, true);
+  assert.equal(gateway?.fields.find((field) => field.key === "speaker")?.value, "旁白");
+  assert.equal(view.groups.some((group) => group.id === "volc_asr"), false);
+  assert.equal(JSON.stringify(view).includes("AKIA-live-9999"), false);
+  assert.equal(JSON.stringify(view).includes("hgt_live_token"), false);
+});
+
+test("direct provider groups return when the gateway is disabled", async (t) => {
+  const root = await workspace(t);
+  const path = join(root, "config.json");
+  await writeFile(path, JSON.stringify({
+    hypit_gateway: { enabled: false },
+    volc_asr: { api_key: "AKIA-live-9999", endpoint: "https://openspeech.bytedance.com", enable_speaker: false },
+  }));
+
+  const view = await readProviderSettings(path, offline);
+  assert.deepEqual(view.groups.map((group) => group.id), ["hypit_gateway", "volc_asr", "volc_tos", "volc_tts"]);
   const asr = view.groups.find((group) => group.id === "volc_asr");
   assert.equal(asr?.fields.find((field) => field.key === "api_key")?.value, null);
   assert.equal(asr?.fields.find((field) => field.key === "api_key")?.stored, true);
   assert.equal(asr?.fields.find((field) => field.key === "endpoint")?.value, "https://openspeech.bytedance.com");
   assert.equal(asr?.fields.find((field) => field.key === "enable_speaker")?.value, false);
-  // The stored key selects the api_key style, so the alternative pair is not offered.
   assert.deepEqual(asr?.fields.map((field) => field.key), ["api_key", "endpoint", "resource_id", "enable_speaker"]);
   assert.equal(JSON.stringify(view).includes("AKIA-live-9999"), false);
 });
@@ -65,6 +93,27 @@ test("a missing config file reads as an empty document", async (t) => {
   assert.equal(view.groups.every((group) => group.fields.every((field) => field.value === null)), true);
 });
 
+test("gateway connection settings stay server-side and are validated before a check", async (t) => {
+  const root = await workspace(t);
+  const path = join(root, "config.json");
+  await writeFile(path, JSON.stringify({
+    hypit_gateway: {
+      enabled: true,
+      url: "https://gateway.example.com/",
+      token: "hgt_server_only",
+      speaker: "旁白",
+    },
+  }));
+  assert.deepEqual(await readGatewayConnectionConfig(path), {
+    url: "https://gateway.example.com",
+    token: "hgt_server_only",
+    speaker: "旁白",
+  });
+
+  await writeFile(path, JSON.stringify({ hypit_gateway: { enabled: false } }));
+  await assert.rejects(readGatewayConnectionConfig(path), /Enable the Hypit platform gateway/u);
+});
+
 test("a patch keeps blank fields out, so saving an untouched form preserves stored secrets", async (t) => {
   const root = await workspace(t);
   const path = join(root, "config.json");
@@ -83,6 +132,7 @@ test("a patch keeps blank fields out, so saving an untouched form preserves stor
 test("a patch rejects unknown groups, wrong types and out-of-range numbers", () => {
   assert.throws(() => providerSettingsPatch({ volc_missing: {} }), /Unknown provider settings group/u);
   assert.throws(() => providerSettingsPatch({ volc_asr: "text" }), /must be an object/u);
+  assert.throws(() => providerSettingsPatch({ hypit_gateway: { enabled: "yes" } }), /must be a boolean/u);
   assert.throws(() => providerSettingsPatch({ volc_asr: { enable_speaker: "yes" } }), /must be a boolean/u);
   assert.throws(() => providerSettingsPatch({ volc_tts: { sample_rate: 10_000_000 } }), /at most 192000/u);
   assert.throws(() => providerSettingsPatch({ volc_tts: { format: "flac" } }), /must be one of/u);

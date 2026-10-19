@@ -18,10 +18,17 @@ export type VolcObjectStorageConfig = {
   readonly bucket: string;
 };
 
+export type HypitGatewayConfig = {
+  readonly url: string;
+  readonly token: string;
+};
+
 export type VolcConfig = {
   readonly path: string;
   readonly asr: VolcAsrServiceConfig;
-  readonly tos: VolcObjectStorageConfig;
+  readonly tos?: VolcObjectStorageConfig;
+  /** When present, transcription goes through the tenant gateway without local Volc credentials. */
+  readonly gateway?: HypitGatewayConfig;
 };
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -65,6 +72,18 @@ function endpoint(value: unknown, subject: string): string {
   return result.replace(/\/+$/u, "");
 }
 
+function gatewayConfig(value: unknown): HypitGatewayConfig | undefined {
+  if (value === undefined || value === null) return undefined;
+  const gateway = object(value, "hypit_gateway");
+  assert(gateway.enabled === undefined || typeof gateway.enabled === "boolean",
+    "hypit_gateway.enabled must be boolean");
+  if (gateway.enabled !== true) return undefined;
+  return {
+    url: endpoint(gateway.url, "hypit_gateway.url"),
+    token: requiredString(gateway.token, "hypit_gateway.token"),
+  };
+}
+
 /** Read only the caller's explicit file or VOLC_ASR_CONFIG; never search other users' history. */
 export async function readVolcConfig(path?: string): Promise<VolcConfig> {
   const selected = resolve(path ?? process.env.VOLC_ASR_CONFIG ?? "config.json");
@@ -75,6 +94,18 @@ export async function readVolcConfig(path?: string): Promise<VolcConfig> {
     throw new Error(`Unable to read Volc ASR config at ${selected}: ${error instanceof Error ? error.message : String(error)}`);
   }
   const root = object(expandEnvironment(raw), "Volc ASR config");
+  const gateway = gatewayConfig(root.hypit_gateway);
+  if (gateway !== undefined) {
+    return {
+      path: selected,
+      gateway,
+      asr: {
+        endpoint: gateway.url,
+        resourceId: "hypit-gateway",
+        enableSpeaker: true,
+      },
+    };
+  }
   const asr = object(root.volc_asr, "volc_asr");
   const tos = object(root.volc_tos, "volc_tos");
 

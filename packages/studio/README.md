@@ -37,6 +37,13 @@ The tab strip ends with an icon-only Provider settings tab. It edits the Volceng
 Doubao ASR and voice-clone providers read: `<workspace>/config.json`, or `HYPIT_PROVIDER_CONFIG` when
 that is set. A stored secret is never sent to the browser—the pane only learns that a value exists—and a
 blank field keeps whatever is already stored, so saving a partly filled form cannot erase a credential.
+The first group configures the Hypit platform gateway: enable it, enter the HTTPS gateway URL, the
+tenant token and an optional default voice name. Check gateway saves the form and calls
+`/gateway/v1/me`, showing the tenant, available balance and assigned voice count without returning
+the token. TTS and ASR providers switch to the gateway automatically while the group is enabled. With
+the gateway enabled, Studio hides the direct Doubao ASR, TOS, and voice-clone settings because those
+credentials and resources are managed by the gateway operator. Disable the gateway and save to restore
+the direct-provider fields.
 Only the credential style the file already uses is shown: a file with `api_key` shows that field alone,
 while a file with `app_id`/`access_token` shows that pair instead, because the providers accept one or the
 other and never both.

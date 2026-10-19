@@ -35,6 +35,23 @@ type ProviderSettingsView = {
   readonly refusedSecrets?: readonly string[];
 };
 
+type GatewayCheckView = {
+  readonly ok: boolean;
+  readonly tenant: {
+    readonly id: string | null;
+    readonly name: string | null;
+    readonly status: string | null;
+  };
+  readonly wallet: {
+    readonly balanceFen: number | null;
+    readonly reservedFen: number | null;
+    readonly availableFen: number | null;
+  };
+  readonly voiceCount: number;
+  readonly defaultSpeaker: string | null;
+  readonly checkedAt: string;
+};
+
 export type ProvidersPane = {
   readonly element: HTMLElement;
   activate(): void;
@@ -106,24 +123,39 @@ export function createProvidersPane(): ProvidersPane {
       <div class="provider-groups" data-provider-groups></div>
       <div class="provider-actions">
         <button type="button" data-provider-save data-primary>${uiLabel("common.save")}</button>
+        <button type="button" data-provider-check-gateway>${uiLabel("providers.check-gateway")}</button>
         <button type="button" data-provider-pull>${uiLabel("providers.pull")}</button>
         <button type="button" data-provider-reload>${uiLabel("providers.reload")}</button>
       </div>
       <p class="provider-note" data-provider-path></p>
       <p class="provider-note" data-provider-remote></p>
-      <p class="provider-note">${uiLabel("providers.secrets-note")}</p>
+      <p class="provider-note" data-provider-secrets-note></p>
     </div>`;
   const groupsNode = panel.content.querySelector<HTMLElement>("[data-provider-groups]")!;
   const status = panel.content.querySelector<HTMLElement>("[data-provider-status]")!;
   const pathNote = panel.content.querySelector<HTMLElement>("[data-provider-path]")!;
   const remoteNote = panel.content.querySelector<HTMLElement>("[data-provider-remote]")!;
+  const secretsNote = panel.content.querySelector<HTMLElement>("[data-provider-secrets-note]")!;
   const save = panel.content.querySelector<HTMLButtonElement>("[data-provider-save]")!;
+  const checkGateway = panel.content.querySelector<HTMLButtonElement>("[data-provider-check-gateway]")!;
   const pull = panel.content.querySelector<HTMLButtonElement>("[data-provider-pull]")!;
   const reload = panel.content.querySelector<HTMLButtonElement>("[data-provider-reload]")!;
   const refresh = panel.toolbar.querySelector<HTMLButtonElement>("[data-provider-refresh]")!;
   let view: ProviderSettingsView | null = null;
   let loaded = false;
   let busy = false;
+
+  const setGatewayVisibility = (enabled: boolean): void => {
+    groupsNode.querySelectorAll<HTMLElement>("[data-provider-group]").forEach((section) => {
+      section.hidden = enabled && section.dataset.providerGroup !== "hypit_gateway";
+    });
+    checkGateway.hidden = !enabled;
+    pull.hidden = enabled;
+    reload.hidden = enabled;
+    pathNote.hidden = enabled;
+    remoteNote.hidden = enabled;
+    uiText(secretsNote, enabled ? "providers.gateway-secrets-note" : "providers.secrets-note");
+  };
 
   const say = (message?: string, tone: "note" | "error" = "note"): void => {
     status.hidden = message === undefined;
@@ -156,6 +188,9 @@ export function createProvidersPane(): ProvidersPane {
       section.append(header, fields);
       groupsNode.append(section);
     }
+    const gatewayGroup = next.groups.find((group) => group.id === "hypit_gateway");
+    const gatewayEnabled = gatewayGroup?.fields.find((field) => field.key === "enabled")?.value === true;
+    setGatewayVisibility(gatewayEnabled);
     uiText(pathNote, "providers.path", { path: next.path });
     if (next.remote.configured) {
       uiText(remoteNote, "providers.remote", { url: next.remote.url ?? "", state: next.remote.error ?? (next.remote.pulledAt ?? "") });
@@ -163,7 +198,8 @@ export function createProvidersPane(): ProvidersPane {
       uiText(remoteNote, "providers.remote-none");
     }
     save.disabled = false;
-    pull.disabled = !next.remote.configured || busy;
+    checkGateway.disabled = false;
+    pull.disabled = !next.remote.configured;
     reload.disabled = false;
   };
 
@@ -191,8 +227,8 @@ export function createProvidersPane(): ProvidersPane {
     }
   };
 
-  const submit = async (): Promise<void> => {
-    if (view === null || busy) return;
+  const submit = async (): Promise<boolean> => {
+    if (view === null || busy) return false;
     const patch: Record<string, Record<string, unknown>> = {};
     for (const group of view.groups) {
       const fields: Record<string, unknown> = {};
@@ -210,11 +246,40 @@ export function createProvidersPane(): ProvidersPane {
     try {
       render(await request("PUT", patch));
       say(t("providers.saved"));
+      return true;
     } catch (error) {
       save.disabled = false;
       say(t("providers.save-failed", { detail: error instanceof Error ? error.message : String(error) }), "error");
+      return false;
     } finally {
       busy = false;
+    }
+  };
+
+  const verifyGateway = async (): Promise<void> => {
+    if (busy || !(await submit())) return;
+    busy = true;
+    checkGateway.disabled = true;
+    say(t("providers.checking-gateway"));
+    try {
+      const response = await fetch("/__studio/provider-settings/gateway-check", { method: "POST" });
+      const body = await response.json() as GatewayCheckView & { error?: string };
+      if (!response.ok || typeof body.error === "string") {
+        throw new Error(body.error ?? `Request failed (${response.status})`);
+      }
+      const available = body.wallet.availableFen ?? body.wallet.balanceFen;
+      say(t("providers.gateway-ok", {
+        tenant: body.tenant.name ?? body.tenant.id ?? "unknown",
+        balance: available === null ? "?" : (available / 100).toFixed(2),
+        voices: body.voiceCount,
+      }));
+    } catch (error) {
+      say(t("providers.gateway-failed", {
+        detail: error instanceof Error ? error.message : String(error),
+      }), "error");
+    } finally {
+      busy = false;
+      checkGateway.disabled = false;
     }
   };
 
@@ -239,9 +304,16 @@ export function createProvidersPane(): ProvidersPane {
   };
 
   save.addEventListener("click", () => { void submit(); });
+  checkGateway.addEventListener("click", () => { void verifyGateway(); });
   pull.addEventListener("click", () => { void sync(); });
   reload.addEventListener("click", () => { void load(); });
   refresh.addEventListener("click", () => { void load(); });
+  groupsNode.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || target.type !== "checkbox") return;
+    if (target.dataset.providerGroup !== "hypit_gateway" || target.dataset.providerKey !== "enabled") return;
+    setGatewayVisibility(target.checked);
+  });
   panel.content.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
       event.preventDefault();

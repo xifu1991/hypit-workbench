@@ -1,10 +1,12 @@
 export {
   doubaoSpeechAudioFormats,
   readDoubaoSpeechConfig,
+  resolveDoubaoSpeaker,
 } from "./config.js";
 export type {
   DoubaoSpeechAudioFormat,
   DoubaoSpeechConfig,
+  HypitGatewaySpeechConfig,
 } from "./config.js";
 export {
   describeDoubaoSpeechFailure,

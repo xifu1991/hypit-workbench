@@ -4,9 +4,11 @@ import type { Plugin } from "vite";
 import {
   providerSettingsPatch,
   pullProviderSettings,
+  readGatewayConnectionConfig,
   readProviderSettings,
   remoteSettingsSource,
   writeProviderSettings,
+  type GatewayConnectionConfig,
   type ProviderRemoteState,
 } from "./provider-settings.js";
 
@@ -32,6 +34,62 @@ async function readRequestBody(request: import("node:http").IncomingMessage): Pr
 }
 
 const settingsPath = "/__studio/provider-settings";
+const gatewayCheckPath = `${settingsPath}/gateway-check`;
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+async function checkGatewayConnection(gateway: GatewayConnectionConfig) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30_000);
+  try {
+    const response = await fetch(`${gateway.url}/gateway/v1/me`, {
+      headers: { authorization: `Bearer ${gateway.token}` },
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    let body: unknown = {};
+    try {
+      body = text.trim().length === 0 ? {} : JSON.parse(text) as unknown;
+    } catch {
+      if (!response.ok) throw new Error(`Gateway responded ${response.status}: ${text.slice(0, 300)}`);
+      throw new Error("Gateway returned invalid JSON.");
+    }
+    const envelope = record(body) ?? {};
+    if (!response.ok) {
+      const message = typeof envelope.message === "string" ? envelope.message : text.slice(0, 300);
+      throw new Error(`Gateway responded ${response.status}: ${message}`);
+    }
+    const tenant = record(envelope.tenant) ?? {};
+    const wallet = record(envelope.wallet) ?? {};
+    const voices = Array.isArray(envelope.voices) ? envelope.voices : [];
+    return {
+      ok: true,
+      tenant: {
+        id: typeof tenant.id === "string" ? tenant.id : null,
+        name: typeof tenant.name === "string" ? tenant.name : null,
+        status: typeof tenant.status === "string" ? tenant.status : null,
+      },
+      wallet: {
+        balanceFen: numberOrNull(wallet.balanceFen),
+        reservedFen: numberOrNull(wallet.reservedFen),
+        availableFen: numberOrNull(wallet.availableFen),
+      },
+      voiceCount: voices.length,
+      defaultSpeaker: gateway.speaker ?? null,
+      checkedAt: new Date().toISOString(),
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export function studioProviderSettingsPlugin(options: StudioProviderSettingsOptions): Plugin {
   const configured = options.configPath?.trim();
@@ -57,12 +115,23 @@ export function studioProviderSettingsPlugin(options: StudioProviderSettingsOpti
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
         const url = new URL(request.url ?? "/", "http://studio.hypit.local");
-        if (url.pathname !== settingsPath && url.pathname !== `${settingsPath}/pull`) {
+        if (url.pathname !== settingsPath
+          && url.pathname !== `${settingsPath}/pull`
+          && url.pathname !== gatewayCheckPath) {
           next();
           return;
         }
         void (async () => {
           try {
+            if (url.pathname === gatewayCheckPath) {
+              if (request.method !== "POST") {
+                response.statusCode = 405;
+                response.end();
+                return;
+              }
+              json(response, 200, await checkGatewayConnection(await readGatewayConnectionConfig(configPath)));
+              return;
+            }
             if (url.pathname === `${settingsPath}/pull`) {
               if (request.method !== "POST") {
                 response.statusCode = 405;

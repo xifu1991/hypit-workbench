@@ -1,4 +1,6 @@
-import type { VolcConfig } from "./config.js";
+import { createHash } from "node:crypto";
+
+import type { VolcConfig, VolcObjectStorageConfig } from "./config.js";
 import { signTosUrl } from "./tos.js";
 
 type ReportProgress = (phase: string) => Promise<void> | void;
@@ -85,15 +87,19 @@ function objectName(prefix: string): string {
   return `${normalized.length === 0 ? "hypit-volc-asr" : normalized}/${crypto.randomUUID()}.wav`;
 }
 
-async function putObject(options: TranscribeVolcOptions, key: string): Promise<string> {
+async function putObject(
+  options: TranscribeVolcOptions,
+  tos: VolcObjectStorageConfig,
+  key: string,
+): Promise<string> {
   const url = signTosUrl({
     method: "PUT",
-    endpoint: options.config.tos.endpoint,
-    region: options.config.tos.region,
-    bucket: options.config.tos.bucket,
+    endpoint: tos.endpoint,
+    region: tos.region,
+    bucket: tos.bucket,
     key,
-    accessKey: options.config.tos.accessKey,
-    secretKey: options.config.tos.secretKey,
+    accessKey: tos.accessKey,
+    secretKey: tos.secretKey,
     expiresSeconds: options.presignExpiresSeconds,
   });
   await options.reportProgress?.("Uploading speech evidence to Volc TOS");
@@ -110,25 +116,29 @@ async function putObject(options: TranscribeVolcOptions, key: string): Promise<s
   }
   return signTosUrl({
     method: "GET",
-    endpoint: options.config.tos.endpoint,
-    region: options.config.tos.region,
-    bucket: options.config.tos.bucket,
+    endpoint: tos.endpoint,
+    region: tos.region,
+    bucket: tos.bucket,
     key,
-    accessKey: options.config.tos.accessKey,
-    secretKey: options.config.tos.secretKey,
+    accessKey: tos.accessKey,
+    secretKey: tos.secretKey,
     expiresSeconds: options.presignExpiresSeconds,
   });
 }
 
-async function deleteObject(options: TranscribeVolcOptions, key: string): Promise<void> {
+async function deleteObject(
+  options: TranscribeVolcOptions,
+  tos: VolcObjectStorageConfig,
+  key: string,
+): Promise<void> {
   const url = signTosUrl({
     method: "DELETE",
-    endpoint: options.config.tos.endpoint,
-    region: options.config.tos.region,
-    bucket: options.config.tos.bucket,
+    endpoint: tos.endpoint,
+    region: tos.region,
+    bucket: tos.bucket,
     key,
-    accessKey: options.config.tos.accessKey,
-    secretKey: options.config.tos.secretKey,
+    accessKey: tos.accessKey,
+    secretKey: tos.secretKey,
     expiresSeconds: options.presignExpiresSeconds,
   });
   const response = await fetch(url, {
@@ -140,12 +150,78 @@ async function deleteObject(options: TranscribeVolcOptions, key: string): Promis
   }
 }
 
-export async function transcribeVolc(options: TranscribeVolcOptions): Promise<Record<string, unknown>> {
+function gatewayErrorDetail(body: string): { readonly code?: string; readonly message?: string } {
+  const text = body.trim();
+  if (text.length === 0) return {};
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const record = parsed as Record<string, unknown>;
+      return {
+        ...(record.code === undefined ? {} : { code: String(record.code) }),
+        ...(record.message === undefined ? {} : { message: String(record.message) }),
+      };
+    }
+  } catch {
+    // A proxy may answer with plain text instead of the gateway's JSON envelope.
+  }
+  return { message: text.split(/\r?\n/u)[0]!.slice(0, 400) };
+}
+
+async function transcribeThroughGateway(options: TranscribeVolcOptions): Promise<Record<string, unknown>> {
+  const gateway = options.config.gateway!;
+  const digest = createHash("sha256").update(options.audio).digest("hex");
+  const baseKey = `doubao-asr:${digest}`;
+  let key = baseKey;
+
+  await options.reportProgress?.("Submitting speech to the Hypit gateway");
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const body = new ArrayBuffer(options.audio.byteLength);
+    new Uint8Array(body).set(options.audio);
+    const response = await fetch(`${gateway.url}/gateway/v1/asr`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${gateway.token}`,
+        "Content-Type": "audio/wav",
+        "Idempotency-Key": key,
+      },
+      body,
+      signal: AbortSignal.timeout(options.requestTimeoutMs),
+    });
+    const bytes = await limitedBytes(response, options.maxResponseBytes, "Hypit gateway ASR");
+    const text = new TextDecoder().decode(bytes);
+    if (!response.ok) {
+      const detail = gatewayErrorDetail(text);
+      if (attempt === 0 && detail.code === "previous_request_failed") {
+        key = `${baseKey}:retry:${crypto.randomUUID()}`;
+        continue;
+      }
+      const code = detail.code === undefined ? "" : ` code=${detail.code}`;
+      const message = detail.message === undefined ? "no response body" : detail.message;
+      throw new Error(`Hypit gateway transcription failed with HTTP ${response.status}${code}: ${message}`);
+    }
+    const parsed = text.trim().length === 0 ? {} : JSON.parse(text) as unknown;
+    assert(parsed !== null && typeof parsed === "object" && !Array.isArray(parsed),
+      "Hypit gateway ASR returned an invalid JSON object");
+    const envelope = parsed as Record<string, unknown>;
+    const result = envelope.result;
+    assert(result !== null && typeof result === "object" && !Array.isArray(result),
+      "Hypit gateway ASR response has no result object");
+    await options.reportProgress?.("Doubao transcription completed through Hypit");
+    return result as Record<string, unknown>;
+  }
+  throw new Error("Hypit gateway ASR retry loop ended unexpectedly");
+}
+
+async function transcribeVolcDirect(
+  options: TranscribeVolcOptions,
+  tos: VolcObjectStorageConfig,
+): Promise<Record<string, unknown>> {
   const requestId = crypto.randomUUID();
   const key = objectName(options.temporaryObjectPrefix);
   let uploaded = false;
   try {
-    const audioUrl = await putObject(options, key);
+    const audioUrl = await putObject(options, tos, key);
     uploaded = true;
     await options.reportProgress?.("Submitting Doubao recording-file transcription");
 
@@ -203,7 +279,7 @@ export async function transcribeVolc(options: TranscribeVolcOptions): Promise<Re
   } finally {
     if (uploaded && options.deleteTemporaryObject) {
       try {
-        await deleteObject(options, key);
+        await deleteObject(options, tos, key);
       } catch (error) {
         await options.reportDiagnostic?.(
           "warning",
@@ -212,4 +288,11 @@ export async function transcribeVolc(options: TranscribeVolcOptions): Promise<Re
       }
     }
   }
+}
+
+export async function transcribeVolc(options: TranscribeVolcOptions): Promise<Record<string, unknown>> {
+  if (options.config.gateway !== undefined) return transcribeThroughGateway(options);
+  assert(options.config.tos !== undefined,
+    "volc_tos is required when the Hypit gateway is disabled");
+  return transcribeVolcDirect(options, options.config.tos);
 }
