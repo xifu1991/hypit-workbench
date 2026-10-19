@@ -26,6 +26,7 @@ coverage/
 .env
 .env.*
 !.env.example
+/config.json
 *.key
 *.pem
 *.p12
